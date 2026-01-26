@@ -1,0 +1,98 @@
+import { Job, Booking } from '../types/booking.types';
+
+export const mockJobs: Job[] = [
+  {
+    id: '1',
+    serviceType: 'elderly',
+    description: 'Cần người chăm sóc người già 80 tuổi, hỗ trợ ăn uống và vệ sinh cá nhân',
+    location: {
+      address: '123 Nguyễn Văn Linh, Quận 7, TP.HCM',
+      latitude: 10.7297,
+      longitude: 106.7029,
+    },
+    startTime: new Date('2024-02-15T08:00:00'),
+    endTime: new Date('2024-02-15T17:00:00'),
+    budgetMin: 200000,
+    budgetMax: 300000,
+    status: 'OPEN',
+    createdAt: new Date('2024-02-10T10:00:00'),
+    distance: 2.5,
+    fitScore: 85,
+  },
+  {
+    id: '2',
+    serviceType: 'baby',
+    description: 'Trông trẻ 6 tháng tuổi, ca sáng từ 7h-12h',
+    location: {
+      address: '456 Lê Văn Việt, Quận 9, TP.HCM',
+      latitude: 10.8419,
+      longitude: 106.8099,
+    },
+    startTime: new Date('2024-02-16T07:00:00'),
+    endTime: new Date('2024-02-16T12:00:00'),
+    budgetMin: 150000,
+    budgetMax: 200000,
+    status: 'OPEN',
+    createdAt: new Date('2024-02-11T09:00:00'),
+    distance: 5.2,
+    fitScore: 78,
+  },
+  {
+    id: '3',
+    serviceType: 'patient',
+    description: 'Chăm sóc bệnh nhân sau mổ, cần có kinh nghiệm tiêm thuốc',
+    location: {
+      address: '789 Điện Biên Phủ, Quận Bình Thạnh, TP.HCM',
+      latitude: 10.8019,
+      longitude: 106.7149,
+    },
+    startTime: new Date('2024-02-17T09:00:00'),
+    endTime: new Date('2024-02-17T18:00:00'),
+    budgetMin: 250000,
+    budgetMax: 350000,
+    status: 'OPEN',
+    createdAt: new Date('2024-02-12T11:00:00'),
+    distance: 3.8,
+    fitScore: 92,
+  },
+];
+
+export const mockBookings: Booking[] = [
+  {
+    id: '1',
+    jobId: '1',
+    clientId: 'c1',
+    clientName: 'Nguyễn Văn A',
+    agreedRate: 250000,
+    startTime: new Date('2024-02-15T08:00:00'),
+    endTime: new Date('2024-02-15T17:00:00'),
+    location: {
+      address: '123 Nguyễn Văn Linh, Quận 7, TP.HCM',
+      latitude: 10.7297,
+      longitude: 106.7029,
+    },
+    status: 'SCHEDULED',
+    createdAt: new Date('2024-02-13T10:00:00'),
+  },
+  {
+    id: '2',
+    jobId: '2',
+    clientId: 'c2',
+    clientName: 'Trần Thị B',
+    agreedRate: 180000,
+    startTime: new Date('2024-02-14T07:00:00'),
+    endTime: new Date('2024-02-14T12:00:00'),
+    location: {
+      address: '456 Lê Văn Việt, Quận 9, TP.HCM',
+      latitude: 10.8419,
+      longitude: 106.8099,
+    },
+    status: 'IN_PROGRESS',
+    createdAt: new Date('2024-02-12T09:00:00'),
+    timesheet: {
+      checkinAt: new Date('2024-02-14T07:05:00'),
+      clientConfirmed: false,
+    },
+  },
+];
+

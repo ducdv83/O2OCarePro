@@ -24,6 +24,14 @@ export default function LoginScreen() {
         params: { phone, type: 'login', requestId: response.request_id },
       });
     } catch (error: any) {
+      // [DEV] Khi backend không chạy / lỗi mạng: vẫn vào màn verify-otp, dùng nút "Dev: Vào app (OTP 1234)"
+      if (__DEV__ && (error?.message?.includes('Network') || error?.code === 'ERR_NETWORK')) {
+        router.push({
+          pathname: '/(auth)/verify-otp',
+          params: { phone, type: 'login', requestId: 'dev-request-id' },
+        });
+        return;
+      }
       Alert.alert('Lỗi', error.message || 'Không thể gửi mã OTP. Vui lòng thử lại.');
     } finally {
       setLoading(false);

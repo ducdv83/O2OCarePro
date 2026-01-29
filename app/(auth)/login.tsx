@@ -14,9 +14,11 @@ export default function LoginScreen() {
       return;
     }
 
+    console.log('[Login] Gửi OTP cho số:', phone);
     setLoading(true);
     try {
       const response = await authApi.requestOtp(phone);
+      console.log('[Login] OTP response:', response?.request_id ?? response);
       router.push({
         pathname: '/(auth)/verify-otp',
         params: { phone, type: 'login', requestId: response.request_id },

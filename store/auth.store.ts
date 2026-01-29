@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
+import { Platform } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 
 interface AuthState {
@@ -23,6 +24,23 @@ const secureStorage = {
   },
 };
 
+const webStorage = {
+  getItem: async (name: string): Promise<string | null> => {
+    if (typeof localStorage === 'undefined') return null;
+    return Promise.resolve(localStorage.getItem(name));
+  },
+  setItem: async (name: string, value: string): Promise<void> => {
+    if (typeof localStorage !== 'undefined') localStorage.setItem(name, value);
+    return Promise.resolve();
+  },
+  removeItem: async (name: string): Promise<void> => {
+    if (typeof localStorage !== 'undefined') localStorage.removeItem(name);
+    return Promise.resolve();
+  },
+};
+
+const storage = Platform.OS === 'web' ? webStorage : secureStorage;
+
 export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
@@ -35,7 +53,7 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: 'auth-storage',
-      storage: createJSONStorage(() => secureStorage),
+      storage: createJSONStorage(() => storage),
     }
   )
 );

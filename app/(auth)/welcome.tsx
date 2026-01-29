@@ -24,14 +24,20 @@ export default function WelcomeScreen() {
       <View className="w-full gap-4">
         <TouchableOpacity
           className="bg-blue-500 py-4 rounded-lg items-center"
-          onPress={() => router.push('/(auth)/login')}
+          onPress={() => {
+            console.log('[Welcome] Đăng nhập tapped → chuyển màn Login');
+            router.push('/(auth)/login');
+          }}
         >
           <Text className="text-white text-lg font-semibold">Đăng nhập</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           className="bg-white border-2 border-blue-500 py-4 rounded-lg items-center"
-          onPress={() => router.push('/(auth)/register')}
+          onPress={() => {
+            console.log('[Welcome] Tạo tài khoản tapped → chuyển màn Register');
+            router.push('/(auth)/register');
+          }}
         >
           <Text className="text-blue-500 text-lg font-semibold">Tạo tài khoản</Text>
         </TouchableOpacity>

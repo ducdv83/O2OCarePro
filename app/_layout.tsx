@@ -19,16 +19,16 @@ function RootLayoutNav() {
   const router = useRouter();
 
   useEffect(() => {
-    const inAuthGroup = segments[0] === '(auth)';
-    const inTabsGroup = segments[0] === '(tabs)';
-
-    if (!isAuthenticated && !inAuthGroup) {
-      // Redirect to welcome if not authenticated
-      router.replace('/(auth)/welcome');
-    } else if (isAuthenticated && inAuthGroup) {
-      // Redirect to home if authenticated
-      router.replace('/(tabs)');
-    }
+    // Defer navigation đến sau khi Root Layout/navigator đã mount (tránh lỗi expo-router trên web)
+    const t = setTimeout(() => {
+      const inAuthGroup = segments[0] === '(auth)';
+      if (!isAuthenticated && !inAuthGroup) {
+        router.replace('/(auth)/welcome');
+      } else if (isAuthenticated && inAuthGroup) {
+        router.replace('/(tabs)');
+      }
+    }, 0);
+    return () => clearTimeout(t);
   }, [isAuthenticated, segments]);
 
   return (

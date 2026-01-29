@@ -4,6 +4,7 @@
   "main": "index.ts",
   "scripts": {
     "start": "expo start",
+    "start:tunnel": "expo start --tunnel",
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
@@ -11,11 +12,12 @@
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\""
   },
   "dependencies": {
+    "@expo/metro-runtime": "~6.1.2",
     "@hookform/resolvers": "^5.2.2",
     "@react-native-async-storage/async-storage": "^2.2.0",
-    "axios": "^1.6.2",
     "@react-native-community/datetimepicker": "^8.5.1",
     "@tanstack/react-query": "^5.90.12",
+    "axios": "^1.6.2",
     "date-fns": "^4.1.0",
     "expo": "~54.0.29",
     "expo-constants": "^18.0.12",
@@ -28,13 +30,19 @@
     "expo-status-bar": "~3.0.9",
     "nativewind": "^4.2.1",
     "react": "19.1.0",
+    "react-dom": "^19.1.0",
     "react-hook-form": "^7.68.0",
     "react-native": "0.81.5",
+    "react-native-css-interop": "^0.2.1",
     "react-native-date-picker": "^5.0.13",
     "react-native-otp-inputs": "^7.4.0",
+    "react-native-reanimated": "^4.2.1",
     "react-native-safe-area-context": "^5.6.2",
-    "react-native-screens": "^4.19.0",
-    "tailwindcss": "^4.1.18",
+    "react-native-screens": "~4.16.0",
+    "react-native-web": "^0.21.2",
+    "react-native-worklets": "^0.7.2",
+    "react-native-worklets-core": "^1.6.2",
+    "tailwindcss": "^3.4.19",
     "zod": "^4.2.1",
     "zustand": "^5.0.9"
   },
@@ -42,12 +50,16 @@
     "@types/react": "~19.1.0",
     "@typescript-eslint/eslint-plugin": "^8.50.0",
     "@typescript-eslint/parser": "^8.50.0",
+    "babel-plugin-transform-import-meta": "^2.3.3",
+    "babel-preset-expo": "^54.0.10",
     "eslint": "^9.39.2",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.4",
     "prettier": "^3.7.4",
     "typescript": "~5.9.2"
   },
-  "private": true
+  "private": true,
+  "engines": {
+    "node": ">=18"
+  }
 }
-

@@ -16,6 +16,8 @@ Xem chi tiết trong `docs/PROJECT_STRUCTURE.md`
 
 ## Setup
 
+**Lưu ý Windows:** Trên Node 22 có lỗi đã biết khi load Metro config (NativeWind). Dùng **Node 20 LTS** để chạy: tải tại [nodejs.org](https://nodejs.org) hoặc dùng `nvm use 20`.
+
 ```bash
 # Cài đặt dependencies
 npm install
@@ -23,11 +25,18 @@ npm install
 # Chạy development server
 npx expo start
 
+# Chạy với tunnel (tránh "request timed out" khi quét QR trên điện thoại)
+npx expo start --tunnel
+
 # Chạy trên Android
 npx expo start --android
 
 # Chạy trên iOS
 npx expo start --ios
+
+# Xem bản web: chạy expo start, sau đó mở trình duyệt:
+# http://localhost:8081/?platform=web
+# (hoặc nhấn w trong terminal khi đang chạy expo start)
 ```
 
 ## Environment Variables

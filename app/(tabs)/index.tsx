@@ -6,6 +6,7 @@ import { useAuthStore } from '../../store/auth.store';
 import { SERVICE_TYPES } from '../../constants/serviceTypes';
 import { mockJobs } from '../../utils/mockData';
 import { Job } from '../../types/booking.types';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function HomeScreen() {
   const { user } = useAuthStore();
@@ -28,29 +29,30 @@ export default function HomeScreen() {
   };
 
   return (
-    <ScrollView
-      className="flex-1 bg-gray-50"
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-    >
-      <StatusBar style="dark" />
+    <SafeAreaView className="flex-1 bg-slate-50" edges={['top']}>
+      <ScrollView
+        className="flex-1"
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+      >
+        <StatusBar style="dark" />
       
       {/* Header */}
-      <View className="bg-white px-6 py-4">
-        <Text className="text-2xl font-bold text-gray-900">
+      <View className="bg-white px-6 pt-6 pb-5 border-b border-slate-100">
+        <Text className="text-2xl font-semibold text-slate-900">
           Chào mừng, {user?.fullName || 'CarePro'}
         </Text>
-        <Text className="text-gray-600 mt-1">
+        <Text className="text-slate-600 mt-1 text-sm">
           Tìm ca làm việc phù hợp với bạn
         </Text>
       </View>
 
       {/* Toggle Available */}
-      <View className="bg-white px-6 py-4 mt-2 flex-row items-center justify-between">
-        <View>
-          <Text className="text-base font-semibold text-gray-900">
+      <View className="mx-4 mt-4 bg-white rounded-2xl p-5 shadow-sm border border-slate-100 flex-row items-center justify-between">
+        <View className="flex-1 pr-4">
+          <Text className="text-base font-semibold text-slate-900">
             Trạng thái nhận ca
           </Text>
-          <Text className="text-sm text-gray-600">
+          <Text className="text-sm text-slate-600 mt-1">
             {isAvailable ? 'Đang nhận ca' : 'Tạm dừng nhận ca'}
           </Text>
         </View>
@@ -63,25 +65,25 @@ export default function HomeScreen() {
 
       {/* Service Type Filter */}
       {isAvailable && (
-        <View className="px-6 py-4">
-          <Text className="text-base font-semibold text-gray-900 mb-3">
+        <View className="mx-4 mt-4 bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
+          <Text className="text-base font-semibold text-slate-900 mb-3">
             Lọc theo loại dịch vụ
           </Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            <View className="flex-row gap-3">
+            <View className="flex-row gap-2">
               <TouchableOpacity
-                className={`px-4 py-2 rounded-full border ${
+                className={`px-4 py-2 rounded-full ${
                   selectedServiceType === null
-                    ? 'border-blue-500 bg-blue-50'
-                    : 'border-gray-300 bg-white'
+                    ? 'bg-blue-600'
+                    : 'bg-slate-100'
                 }`}
                 onPress={() => setSelectedServiceType(null)}
               >
                 <Text
                   className={`text-sm ${
                     selectedServiceType === null
-                      ? 'text-blue-700 font-semibold'
-                      : 'text-gray-700'
+                      ? 'text-white font-semibold'
+                      : 'text-slate-700'
                   }`}
                 >
                   Tất cả
@@ -90,18 +92,18 @@ export default function HomeScreen() {
               {SERVICE_TYPES.map((service) => (
                 <TouchableOpacity
                   key={service.id}
-                  className={`px-4 py-2 rounded-full border ${
+                  className={`px-4 py-2 rounded-full ${
                     selectedServiceType === service.id
-                      ? 'border-blue-500 bg-blue-50'
-                      : 'border-gray-300 bg-white'
+                      ? 'bg-blue-600'
+                      : 'bg-slate-100'
                   }`}
                   onPress={() => setSelectedServiceType(service.id)}
                 >
                   <Text
                     className={`text-sm ${
                       selectedServiceType === service.id
-                        ? 'text-blue-700 font-semibold'
-                        : 'text-gray-700'
+                        ? 'text-white font-semibold'
+                        : 'text-slate-700'
                     }`}
                   >
                     {service.name}
@@ -115,17 +117,17 @@ export default function HomeScreen() {
 
       {/* Jobs List */}
       {isAvailable ? (
-        <View className="px-6 py-4">
-          <Text className="text-lg font-semibold text-gray-900 mb-4">
+        <View className="mx-4 mt-4 mb-6">
+          <Text className="text-lg font-semibold text-slate-900 mb-4">
             Ca làm việc gần bạn ({filteredJobs.length})
           </Text>
           {filteredJobs.length === 0 ? (
-            <View className="bg-white rounded-lg p-8 items-center">
-              <Text className="text-5xl mb-4">🔍</Text>
-              <Text className="text-gray-900 text-lg font-semibold mb-2 text-center">
+            <View className="bg-white rounded-2xl p-8 items-center border border-slate-100">
+              <View className="w-12 h-12 rounded-full bg-blue-50 mb-4" />
+              <Text className="text-slate-900 text-lg font-semibold mb-2 text-center">
                 Không tìm thấy ca nào
               </Text>
-              <Text className="text-gray-600 text-center text-sm">
+              <Text className="text-slate-600 text-center text-sm">
                 Hãy thử điều chỉnh bộ lọc hoặc kiểm tra lại sau
               </Text>
             </View>
@@ -134,36 +136,36 @@ export default function HomeScreen() {
               {filteredJobs.map((job) => (
                 <TouchableOpacity
                   key={job.id}
-                  className="bg-white rounded-lg p-4 shadow-sm"
+                  className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100"
                   onPress={() => router.push(`/job/${job.id}`)}
                 >
                   <View className="flex-row justify-between items-start mb-2">
                     <View className="flex-1">
-                      <Text className="text-lg font-semibold text-gray-900 mb-1">
+                      <Text className="text-lg font-semibold text-slate-900 mb-1">
                         {SERVICE_TYPES.find((s) => s.id === job.serviceType)?.name}
                       </Text>
-                      <Text className="text-sm text-gray-600 mb-2" numberOfLines={2}>
+                      <Text className="text-sm text-slate-600 mb-2" numberOfLines={2}>
                         {job.description}
                       </Text>
                     </View>
                     {job.fitScore && (
-                      <View className="bg-green-100 px-2 py-1 rounded">
-                        <Text className="text-green-700 text-xs font-semibold">
+                      <View className="bg-emerald-50 px-3 py-1 rounded-full">
+                        <Text className="text-emerald-700 text-xs font-semibold">
                           {job.fitScore}% phù hợp
                         </Text>
                       </View>
                     )}
                   </View>
 
-                  <View className="flex-row items-center gap-4 mb-3">
-                    <Text className="text-sm text-gray-600">📍 {job.distance} km</Text>
-                    <Text className="text-sm text-gray-600">
-                      💰 {job.budgetMin.toLocaleString('vi-VN')} - {job.budgetMax.toLocaleString('vi-VN')}đ/h
+                  <View className="flex-row flex-wrap items-center gap-3 mb-3">
+                    <Text className="text-sm text-slate-600">Khoảng cách {job.distance} km</Text>
+                    <Text className="text-sm text-slate-600">
+                      Thu nhập {job.budgetMin.toLocaleString('vi-VN')} - {job.budgetMax.toLocaleString('vi-VN')}đ/h
                     </Text>
                   </View>
 
-                  <View className="flex-row items-center justify-between pt-3 border-t border-gray-200">
-                    <Text className="text-sm text-gray-600">
+                  <View className="flex-row items-center justify-between pt-3 border-t border-slate-100">
+                    <Text className="text-sm text-slate-600">
                       {new Date(job.startTime).toLocaleDateString('vi-VN', {
                         weekday: 'short',
                         day: 'numeric',
@@ -175,10 +177,10 @@ export default function HomeScreen() {
                       })}
                     </Text>
                     <TouchableOpacity
-                      className="bg-blue-500 px-4 py-2 rounded-lg"
+                      className="bg-blue-600 px-5 py-2 rounded-full"
                       onPress={() => router.push(`/job/${job.id}`)}
                     >
-                      <Text className="text-white font-semibold">Xem chi tiết</Text>
+                      <Text className="text-white text-sm font-semibold">Xem chi tiết</Text>
                     </TouchableOpacity>
                   </View>
                 </TouchableOpacity>
@@ -187,14 +189,15 @@ export default function HomeScreen() {
           )}
         </View>
       ) : (
-        <View className="px-6 py-8 items-center">
-          <Text className="text-4xl mb-4">⏸️</Text>
-          <Text className="text-gray-600 text-center text-lg">
+        <View className="mx-4 mt-6 items-center bg-white rounded-2xl p-8 border border-slate-100">
+          <View className="w-12 h-12 rounded-full bg-slate-100 mb-4" />
+          <Text className="text-slate-600 text-center text-base">
             Bạn đang tạm dừng nhận ca.{'\n'}Bật lại để xem các ca làm việc.
           </Text>
         </View>
       )}
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 

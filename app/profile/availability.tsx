@@ -3,6 +3,8 @@ import { View, Text, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { router } from 'expo-router';
 import { format } from 'date-fns';
+import { vi } from 'date-fns/locale';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 interface TimeSlot {
   start: string;
@@ -108,20 +110,21 @@ export default function AvailabilityScreen() {
   };
 
   return (
-    <ScrollView className="flex-1 bg-gray-50">
+    <SafeAreaView className="flex-1 bg-slate-50" edges={['top']}>
       <StatusBar style="dark" />
       
       {/* Header */}
-      <View className="bg-white px-6 py-4 flex-row items-center">
+      <View className="bg-white px-6 pt-6 pb-5 flex-row items-center border-b border-slate-100">
         <TouchableOpacity onPress={() => router.back()}>
           <Text className="text-2xl">←</Text>
         </TouchableOpacity>
-        <Text className="text-lg font-semibold text-gray-900 ml-4">
+        <Text className="text-lg font-semibold text-slate-900 ml-4">
           Lịch rảnh
         </Text>
       </View>
 
-      <View className="px-6 py-6">
+      <ScrollView className="flex-1">
+        <View className="px-6 py-6">
         <Text className="text-base text-gray-600 mb-6">
           Thiết lập lịch rảnh để khách hàng biết khi nào bạn có thể nhận ca
         </Text>
@@ -229,17 +232,18 @@ export default function AvailabilityScreen() {
           </View>
         )}
 
-        <TouchableOpacity
-          className={`bg-blue-500 py-4 rounded-lg items-center mt-4 mb-8 ${loading ? 'opacity-50' : ''}`}
-          onPress={handleSave}
-          disabled={loading}
-        >
-          <Text className="text-white text-lg font-semibold">
-            {loading ? 'Đang lưu...' : 'Lưu lịch rảnh'}
-          </Text>
-        </TouchableOpacity>
-      </View>
-    </ScrollView>
+          <TouchableOpacity
+            className={`bg-blue-600 py-4 rounded-xl items-center mt-4 mb-8 ${loading ? 'opacity-50' : ''}`}
+            onPress={handleSave}
+            disabled={loading}
+          >
+            <Text className="text-white text-lg font-semibold">
+              {loading ? 'Đang lưu...' : 'Lưu lịch rảnh'}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 

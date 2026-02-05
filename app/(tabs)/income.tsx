@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, ScrollView, RefreshControl } from 'react-
 import { StatusBar } from 'expo-status-bar';
 import { router } from 'expo-router';
 import { formatCurrency } from '../../utils/format';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function IncomeScreen() {
   const [refreshing, setRefreshing] = useState(false);
@@ -55,88 +56,89 @@ const mockTransactions = [
 ];
 
   return (
-    <ScrollView
-      className="flex-1 bg-gray-50"
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-    >
-      <StatusBar style="dark" />
+    <SafeAreaView className="flex-1 bg-slate-50" edges={['top']}>
+      <ScrollView
+        className="flex-1"
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+      >
+        <StatusBar style="dark" />
       
       {/* Header */}
-      <View className="bg-white px-6 py-4">
-        <Text className="text-2xl font-bold text-gray-900">
+      <View className="bg-white px-6 pt-6 pb-5 border-b border-slate-100">
+        <Text className="text-2xl font-semibold text-slate-900">
           Thu nhập
         </Text>
       </View>
 
       {/* Balance Cards */}
-      <View className="px-6 py-4 gap-4">
+      <View className="mx-4 mt-4 gap-4">
         {/* Available Balance */}
-        <View className="bg-blue-500 rounded-lg p-6">
-          <Text className="text-white text-sm mb-2">Số dư khả dụng</Text>
-          <Text className="text-white text-3xl font-bold mb-4">
+        <View className="bg-blue-600 rounded-2xl p-6">
+          <Text className="text-blue-100 text-sm mb-2">Số dư khả dụng</Text>
+          <Text className="text-white text-3xl font-semibold mb-4">
             {formatCurrency(mockIncome.available)}
           </Text>
           <TouchableOpacity
-            className="bg-white rounded-lg py-3 items-center"
+            className="bg-white rounded-full py-3 items-center"
             onPress={() => router.push('/income/withdraw')}
           >
-            <Text className="text-blue-500 font-semibold">Rút tiền</Text>
+            <Text className="text-blue-600 font-semibold">Rút tiền</Text>
           </TouchableOpacity>
         </View>
 
         {/* Escrow Balance */}
-        <View className="bg-orange-100 rounded-lg p-4">
+        <View className="bg-amber-50 rounded-2xl p-4 border border-amber-100">
           <View className="flex-row justify-between items-center">
             <View>
-              <Text className="text-gray-600 text-sm mb-1">Đang tạm giữ</Text>
-              <Text className="text-gray-900 text-xl font-semibold">
+              <Text className="text-slate-600 text-sm mb-1">Đang tạm giữ</Text>
+              <Text className="text-slate-900 text-xl font-semibold">
                 {formatCurrency(mockIncome.escrow)}
               </Text>
             </View>
-            <Text className="text-gray-500 text-xs">
+            <Text className="text-slate-500 text-xs text-right">
               Sẽ được giải ngân sau khi{'\n'}khách hàng xác nhận
             </Text>
           </View>
         </View>
 
         {/* Monthly Summary */}
-        <View className="bg-white rounded-lg p-4">
-          <Text className="text-gray-600 text-sm mb-2">Thu nhập tháng này</Text>
-          <Text className="text-gray-900 text-2xl font-bold">
+        <View className="bg-white rounded-2xl p-4 border border-slate-100">
+          <Text className="text-slate-600 text-sm mb-2">Thu nhập tháng này</Text>
+          <Text className="text-slate-900 text-2xl font-semibold">
             {formatCurrency(mockIncome.totalEarned)}
           </Text>
         </View>
       </View>
 
       {/* Transactions */}
-      <View className="px-6 py-4">
-        <Text className="text-lg font-semibold text-gray-900 mb-4">
+      <View className="mx-4 mt-6">
+        <Text className="text-lg font-semibold text-slate-900 mb-4">
           Lịch sử giao dịch
         </Text>
         <View className="gap-3">
           {mockTransactions.map((transaction) => (
             <View
               key={transaction.id}
-              className="bg-white rounded-lg p-4 flex-row justify-between items-center"
+              className="bg-white rounded-2xl p-4 flex-row justify-between items-center border border-slate-100"
             >
               <View className="flex-1">
-                <Text className="text-gray-900 font-medium mb-1">
+                <Text className="text-slate-900 font-medium mb-1">
                   {transaction.description}
                 </Text>
-                <Text className="text-gray-500 text-sm">
+                <Text className="text-slate-500 text-sm">
                   {transaction.date.toLocaleDateString('vi-VN')}
                 </Text>
               </View>
               <View className="items-end">
                 <Text
                   className={`text-lg font-semibold ${
-                    transaction.amount > 0 ? 'text-green-600' : 'text-red-600'
+                    transaction.amount > 0 ? 'text-emerald-600' : 'text-rose-600'
                   }`}
                 >
                   {transaction.amount > 0 ? '+' : ''}
                   {formatCurrency(Math.abs(transaction.amount))}
                 </Text>
-                <Text className="text-gray-500 text-xs mt-1">
+                <Text className="text-slate-500 text-xs mt-1">
                   {transaction.status === 'PROCESSING' ? 'Đang xử lý' : 'Hoàn tất'}
                 </Text>
               </View>
@@ -146,22 +148,25 @@ const mockTransactions = [
       </View>
 
       {/* Quick Actions */}
-      <View className="px-6 py-4">
+      <View className="mx-4 mt-6 mb-6">
         <TouchableOpacity
-          className="bg-white rounded-lg p-4 flex-row items-center justify-between"
+          className="bg-white rounded-2xl px-5 py-4 flex-row items-center justify-between border border-slate-100"
           onPress={() => router.push('/income/withdraw')}
         >
           <View className="flex-row items-center">
-            <Text className="text-2xl mr-3">💳</Text>
+            <View className="w-10 h-10 rounded-full bg-blue-50 items-center justify-center mr-3">
+              <Text className="text-blue-600 font-semibold">đ</Text>
+            </View>
             <View>
-              <Text className="text-gray-900 font-medium">Rút tiền</Text>
-              <Text className="text-gray-500 text-sm">Thêm tài khoản ngân hàng</Text>
+              <Text className="text-slate-900 font-medium">Rút tiền</Text>
+              <Text className="text-slate-500 text-sm">Thêm tài khoản ngân hàng</Text>
             </View>
           </View>
-          <Text className="text-gray-400">›</Text>
+          <Text className="text-slate-400">›</Text>
         </TouchableOpacity>
       </View>
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 

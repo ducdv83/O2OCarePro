@@ -5,6 +5,7 @@ import { router } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { SERVICE_TYPES, SKILLS } from '../../constants/serviceTypes';
 import { useAuthStore } from '../../store/auth.store';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function EditProfileScreen() {
   const { user } = useAuthStore();
@@ -66,39 +67,40 @@ export default function EditProfileScreen() {
   };
 
   return (
-    <ScrollView className="flex-1 bg-gray-50">
+    <SafeAreaView className="flex-1 bg-slate-50" edges={['top']}>
       <StatusBar style="dark" />
       
       {/* Header */}
-      <View className="bg-white px-6 py-4 flex-row items-center">
+      <View className="bg-white px-6 pt-6 pb-5 flex-row items-center border-b border-slate-100">
         <TouchableOpacity onPress={() => router.back()}>
           <Text className="text-2xl">←</Text>
         </TouchableOpacity>
-        <Text className="text-lg font-semibold text-gray-900 ml-4">
+        <Text className="text-lg font-semibold text-slate-900 ml-4">
           Chỉnh sửa hồ sơ
         </Text>
       </View>
 
-      <View className="px-6 py-6">
+      <ScrollView className="flex-1">
+        <View className="px-6 py-6">
         {/* Avatar */}
         <View className="items-center mb-6">
           <TouchableOpacity onPress={pickImage}>
             {avatar ? (
               <Image source={{ uri: avatar }} className="w-24 h-24 rounded-full" />
             ) : (
-              <View className="w-24 h-24 rounded-full bg-gray-200 items-center justify-center">
-                <Text className="text-4xl">📷</Text>
+              <View className="w-24 h-24 rounded-full bg-slate-200 items-center justify-center">
+                <Text className="text-slate-600 font-semibold">Ảnh</Text>
               </View>
             )}
           </TouchableOpacity>
-          <Text className="text-sm text-gray-600 mt-2">Chạm để chọn ảnh đại diện</Text>
+          <Text className="text-sm text-slate-600 mt-2">Chạm để chọn ảnh đại diện</Text>
         </View>
 
         {/* Full Name */}
         <View className="mb-6">
-          <Text className="text-sm text-gray-700 mb-2">Họ và tên *</Text>
+          <Text className="text-sm text-slate-700 mb-2">Họ và tên *</Text>
           <TextInput
-            className="border border-gray-300 rounded-lg px-4 py-3 bg-white"
+            className="border border-slate-300 rounded-xl px-4 py-3 bg-white"
             placeholder="Nguyễn Thị B"
             value={fullName}
             onChangeText={setFullName}
@@ -107,9 +109,9 @@ export default function EditProfileScreen() {
 
         {/* Bio */}
         <View className="mb-6">
-          <Text className="text-sm text-gray-700 mb-2">Giới thiệu bản thân *</Text>
+          <Text className="text-sm text-slate-700 mb-2">Giới thiệu bản thân *</Text>
           <TextInput
-            className="border border-gray-300 rounded-lg px-4 py-3 h-24 bg-white"
+            className="border border-slate-300 rounded-xl px-4 py-3 h-24 bg-white"
             placeholder="Mô tả về kinh nghiệm và chuyên môn của bạn..."
             value={bio}
             onChangeText={setBio}
@@ -120,9 +122,9 @@ export default function EditProfileScreen() {
 
         {/* Years of Experience */}
         <View className="mb-6">
-          <Text className="text-sm text-gray-700 mb-2">Số năm kinh nghiệm *</Text>
+          <Text className="text-sm text-slate-700 mb-2">Số năm kinh nghiệm *</Text>
           <TextInput
-            className="border border-gray-300 rounded-lg px-4 py-3 bg-white"
+            className="border border-slate-300 rounded-xl px-4 py-3 bg-white"
             placeholder="5"
             value={yearsExp}
             onChangeText={setYearsExp}
@@ -132,9 +134,9 @@ export default function EditProfileScreen() {
 
         {/* Hourly Rate */}
         <View className="mb-6">
-          <Text className="text-sm text-gray-700 mb-2">Giá tham khảo (đ/h) *</Text>
+          <Text className="text-sm text-slate-700 mb-2">Giá tham khảo (đ/h) *</Text>
           <TextInput
-            className="border border-gray-300 rounded-lg px-4 py-3 bg-white"
+            className="border border-slate-300 rounded-xl px-4 py-3 bg-white"
             placeholder="250000"
             value={hourlyRate}
             onChangeText={setHourlyRate}
@@ -144,17 +146,17 @@ export default function EditProfileScreen() {
 
         {/* Service Types */}
         <View className="mb-6">
-          <Text className="text-base font-semibold text-gray-900 mb-3">
+          <Text className="text-base font-semibold text-slate-900 mb-3">
             Loại dịch vụ bạn cung cấp *
           </Text>
           <View className="flex-row flex-wrap gap-3">
             {SERVICE_TYPES.map((service) => (
               <TouchableOpacity
                 key={service.id}
-                className={`px-4 py-3 rounded-lg border-2 ${
+                className={`min-w-[120px] px-4 py-3 rounded-xl border ${
                   selectedServiceTypes.includes(service.id)
                     ? 'border-blue-500 bg-blue-50'
-                    : 'border-gray-300 bg-white'
+                    : 'border-slate-300 bg-white'
                 }`}
                 onPress={() => toggleServiceType(service.id)}
               >
@@ -165,7 +167,7 @@ export default function EditProfileScreen() {
                   className={`text-center text-sm ${
                     selectedServiceTypes.includes(service.id)
                       ? 'text-blue-700 font-semibold'
-                      : 'text-gray-700'
+                      : 'text-slate-700'
                   }`}
                 >
                   {service.name}
@@ -177,7 +179,7 @@ export default function EditProfileScreen() {
 
         {/* Skills */}
         <View className="mb-6">
-          <Text className="text-base font-semibold text-gray-900 mb-3">
+          <Text className="text-base font-semibold text-slate-900 mb-3">
             Kỹ năng của bạn *
           </Text>
           <View className="flex-row flex-wrap gap-2">
@@ -187,7 +189,7 @@ export default function EditProfileScreen() {
                 className={`px-4 py-2 rounded-full border ${
                   selectedSkills.includes(skill)
                     ? 'border-blue-500 bg-blue-50'
-                    : 'border-gray-300 bg-white'
+                    : 'border-slate-300 bg-white'
                 }`}
                 onPress={() => toggleSkill(skill)}
               >
@@ -195,7 +197,7 @@ export default function EditProfileScreen() {
                   className={`text-sm ${
                     selectedSkills.includes(skill)
                       ? 'text-blue-700 font-semibold'
-                      : 'text-gray-700'
+                      : 'text-slate-700'
                   }`}
                 >
                   {skill}
@@ -206,7 +208,7 @@ export default function EditProfileScreen() {
         </View>
 
         <TouchableOpacity
-          className={`bg-blue-500 py-4 rounded-lg items-center mt-4 mb-8 ${loading ? 'opacity-50' : ''}`}
+          className={`bg-blue-600 py-4 rounded-xl items-center mt-4 mb-8 ${loading ? 'opacity-50' : ''}`}
           onPress={handleSave}
           disabled={loading}
         >
@@ -214,8 +216,9 @@ export default function EditProfileScreen() {
             {loading ? 'Đang lưu...' : 'Lưu thay đổi'}
           </Text>
         </TouchableOpacity>
-      </View>
-    </ScrollView>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 

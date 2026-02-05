@@ -55,6 +55,24 @@ export const mockJobs: Job[] = [
     distance: 3.8,
     fitScore: 92,
   },
+  {
+    id: '4',
+    serviceType: 'maternity',
+    description: 'Chăm sóc sản phụ sau sinh, hỗ trợ bé và mẹ trong 7 ngày đầu',
+    location: {
+      address: '12 Trường Sa, Quận 3, TP.HCM',
+      latitude: 10.7881,
+      longitude: 106.6962,
+    },
+    startTime: new Date('2024-02-18T08:00:00'),
+    endTime: new Date('2024-02-18T17:00:00'),
+    budgetMin: 300000,
+    budgetMax: 450000,
+    status: 'OPEN',
+    createdAt: new Date('2024-02-13T08:30:00'),
+    distance: 4.1,
+    fitScore: 88,
+  },
 ];
 
 export const mockBookings: Booking[] = [

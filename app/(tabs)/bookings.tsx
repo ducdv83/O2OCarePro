@@ -6,6 +6,7 @@ import { mockBookings } from '../../utils/mockData';
 import { Booking, BookingStatus } from '../../types/booking.types';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const TABS: { key: BookingStatus | 'ALL'; label: string }[] = [
   { key: 'ALL', label: 'Tất cả' },
@@ -32,18 +33,18 @@ export default function BookingsScreen() {
     }, 1000);
   };
 
-  const getStatusColor = (status: BookingStatus) => {
+  const getStatusStyle = (status: BookingStatus) => {
     switch (status) {
       case 'SCHEDULED':
-        return 'bg-blue-100 text-blue-700';
+        return { bg: 'bg-blue-50', text: 'text-blue-700' };
       case 'IN_PROGRESS':
-        return 'bg-green-100 text-green-700';
+        return { bg: 'bg-emerald-50', text: 'text-emerald-700' };
       case 'COMPLETED':
-        return 'bg-gray-100 text-gray-700';
+        return { bg: 'bg-slate-100', text: 'text-slate-700' };
       case 'CANCELLED':
-        return 'bg-red-100 text-red-700';
+        return { bg: 'bg-rose-50', text: 'text-rose-700' };
       default:
-        return 'bg-gray-100 text-gray-700';
+        return { bg: 'bg-slate-100', text: 'text-slate-700' };
     }
   };
 
@@ -63,59 +64,52 @@ export default function BookingsScreen() {
   };
 
   return (
-    <View className="flex-1 bg-gray-50">
+    <SafeAreaView className="flex-1 bg-slate-50" edges={['top']}>
       <StatusBar style="dark" />
       
       {/* Header */}
-      <View className="bg-white px-6 py-4">
-        <Text className="text-2xl font-bold text-gray-900">
+      <View className="bg-white px-6 pt-6 pb-5 border-b border-slate-100">
+        <Text className="text-2xl font-semibold text-slate-900">
           Ca đã nhận
         </Text>
       </View>
 
-      {/* Tabs */}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        className="bg-white border-b border-gray-200"
-      >
-        <View className="flex-row px-4">
-          {TABS.map((tab) => (
-            <TouchableOpacity
-              key={tab.key}
-              className={`px-4 py-3 border-b-2 ${
-                activeTab === tab.key
-                  ? 'border-blue-500'
-                  : 'border-transparent'
-              }`}
-              onPress={() => setActiveTab(tab.key)}
-            >
-              <Text
-                className={`text-sm font-medium ${
-                  activeTab === tab.key
-                    ? 'text-blue-600'
-                    : 'text-gray-600'
-                }`}
-              >
-                {tab.label}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      </ScrollView>
-
       {/* Bookings List */}
       <ScrollView
-        className="flex-1 px-6 py-4"
+        className="flex-1 px-4 pt-2"
+        contentInsetAdjustmentBehavior="never"
+        contentContainerStyle={{ paddingBottom: 24 }}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        stickyHeaderIndices={[0]}
       >
+        <View className="bg-white -mx-4 px-4 pt-2 pb-2">
+          <View className="flex-row items-center gap-2">
+            {TABS.map((tab) => (
+              <TouchableOpacity
+                key={tab.key}
+                className={`h-9 px-4 rounded-full items-center justify-center ${
+                  activeTab === tab.key ? 'bg-blue-600' : 'bg-slate-100'
+                }`}
+                onPress={() => setActiveTab(tab.key)}
+              >
+                <Text
+                  className={`text-sm font-medium ${
+                    activeTab === tab.key ? 'text-white' : 'text-slate-700'
+                  }`}
+                >
+                  {tab.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
         {filteredBookings.length === 0 ? (
-          <View className="bg-white rounded-lg p-8 items-center mt-8">
-            <Text className="text-5xl mb-4">📅</Text>
-            <Text className="text-gray-900 text-lg font-semibold mb-2 text-center">
+          <View className="bg-white rounded-2xl p-8 items-center mt-8 border border-slate-100">
+            <View className="w-12 h-12 rounded-full bg-blue-50 mb-4" />
+            <Text className="text-slate-900 text-lg font-semibold mb-2 text-center">
               Chưa có ca nào
             </Text>
-            <Text className="text-gray-600 text-center text-sm">
+            <Text className="text-slate-600 text-center text-sm">
               {activeTab === 'ALL'
                 ? 'Bạn chưa nhận ca nào. Hãy bật trạng thái nhận ca để xem các ca mới.'
                 : `Chưa có ca nào trong mục "${TABS.find((t) => t.key === activeTab)?.label}".`}
@@ -123,56 +117,59 @@ export default function BookingsScreen() {
           </View>
         ) : (
           <View className="gap-4">
-            {filteredBookings.map((booking) => (
-              <TouchableOpacity
-                key={booking.id}
-                className="bg-white rounded-lg p-4 shadow-sm"
-                onPress={() => router.push(`/booking/${booking.id}`)}
-              >
-                <View className="flex-row justify-between items-start mb-3">
-                  <View className="flex-1">
-                    <Text className="text-lg font-semibold text-gray-900 mb-1">
-                      {booking.clientName}
+            {filteredBookings.map((booking) => {
+              const statusStyle = getStatusStyle(booking.status);
+              return (
+                <TouchableOpacity
+                  key={booking.id}
+                  className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100"
+                  onPress={() => router.push(`/booking/${booking.id}`)}
+                >
+                  <View className="flex-row justify-between items-start mb-3">
+                    <View className="flex-1">
+                      <Text className="text-lg font-semibold text-slate-900 mb-1">
+                        {booking.clientName}
+                      </Text>
+                      <Text className="text-sm text-slate-600" numberOfLines={2}>
+                        {booking.location.address}
+                      </Text>
+                    </View>
+                    <View className={`px-3 py-1 rounded-full ${statusStyle.bg}`}>
+                      <Text className={`text-xs font-semibold ${statusStyle.text}`}>
+                        {getStatusLabel(booking.status)}
+                      </Text>
+                    </View>
+                  </View>
+
+                  <View className="mb-3">
+                    <Text className="text-sm text-slate-600 mb-1">
+                      Ngày {format(booking.startTime, 'EEEE, dd/MM/yyyy', { locale: vi })}
                     </Text>
-                    <Text className="text-sm text-gray-600" numberOfLines={2}>
-                      {booking.location.address}
+                    <Text className="text-sm text-slate-600">
+                      Giờ {format(booking.startTime, 'HH:mm')} - {format(booking.endTime, 'HH:mm')}
                     </Text>
                   </View>
-                  <View className={`px-2 py-1 rounded ${getStatusColor(booking.status)}`}>
-                    <Text className={`text-xs font-semibold ${getStatusColor(booking.status).split(' ')[1]}`}>
-                      {getStatusLabel(booking.status)}
+
+                  <View className="flex-row justify-between items-center pt-3 border-t border-slate-100">
+                    <Text className="text-base font-semibold text-slate-900">
+                      {booking.agreedRate.toLocaleString('vi-VN')}đ/h
                     </Text>
+                    {booking.status === 'IN_PROGRESS' && (
+                      <TouchableOpacity
+                        className="bg-emerald-600 px-4 py-2 rounded-full"
+                        onPress={() => router.push(`/booking/${booking.id}/timesheet`)}
+                      >
+                        <Text className="text-white text-sm font-semibold">Chấm công</Text>
+                      </TouchableOpacity>
+                    )}
                   </View>
-                </View>
-
-                <View className="mb-3">
-                  <Text className="text-sm text-gray-600 mb-1">
-                    📅 {format(booking.startTime, 'EEEE, dd/MM/yyyy', { locale: vi })}
-                  </Text>
-                  <Text className="text-sm text-gray-600">
-                    ⏰ {format(booking.startTime, 'HH:mm')} - {format(booking.endTime, 'HH:mm')}
-                  </Text>
-                </View>
-
-                <View className="flex-row justify-between items-center pt-3 border-t border-gray-200">
-                  <Text className="text-base font-semibold text-gray-900">
-                    {booking.agreedRate.toLocaleString('vi-VN')}đ/h
-                  </Text>
-                  {booking.status === 'IN_PROGRESS' && (
-                    <TouchableOpacity
-                      className="bg-green-500 px-4 py-2 rounded-lg"
-                      onPress={() => router.push(`/booking/${booking.id}/timesheet`)}
-                    >
-                      <Text className="text-white font-semibold">Chấm công</Text>
-                    </TouchableOpacity>
-                  )}
-                </View>
-              </TouchableOpacity>
-            ))}
+                </TouchableOpacity>
+              );
+            })}
           </View>
         )}
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }
 

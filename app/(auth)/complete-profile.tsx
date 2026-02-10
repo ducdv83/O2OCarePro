@@ -1,9 +1,11 @@
 import { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView, Image, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, ScrollView, Image } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { router } from 'expo-router';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
 import { SERVICE_TYPES, SKILLS } from '../../constants/serviceTypes';
+import { layout } from '../../constants/layout';
 
 export default function CompleteProfileScreen() {
   const [fullName, setFullName] = useState('');
@@ -92,10 +94,14 @@ export default function CompleteProfileScreen() {
   };
 
   return (
-    <ScrollView className="flex-1 bg-white">
-      <StatusBar style="dark" />
-      
-      <View className="px-6 py-8">
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }} edges={['top', 'bottom']}>
+      <ScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={{ paddingBottom: layout.scrollBottomPadding }}
+        keyboardShouldPersistTaps="handled"
+      >
+        <StatusBar style="dark" />
+        <View style={{ paddingHorizontal: layout.horizontalPadding, paddingTop: 24, paddingBottom: 32 }}>
         <Text className="text-3xl font-bold text-gray-900 mb-2">
           Hoàn thiện hồ sơ
         </Text>
@@ -231,8 +237,9 @@ export default function CompleteProfileScreen() {
             {loading ? 'Đang lưu...' : 'Tiếp tục'}
           </Text>
         </TouchableOpacity>
-      </View>
-    </ScrollView>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 

@@ -20,8 +20,8 @@ function TabIcon({ name }: { name: keyof typeof TAB_ICON_SOURCES }) {
 
 const styles = StyleSheet.create({
   tabIcon: {
-    width: 34,
-    height: 34,
+    width: 80,
+    height: 80,
   },
 });
 

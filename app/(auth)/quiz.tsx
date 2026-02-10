@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { router } from 'expo-router';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { layout } from '../../constants/layout';
 
 interface Question {
   id: number;
@@ -133,10 +135,9 @@ export default function QuizScreen() {
   const progress = ((currentQuestion + 1) / QUIZ_QUESTIONS.length) * 100;
 
   return (
-    <View className="flex-1 bg-white">
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }} edges={['top', 'bottom']}>
       <StatusBar style="dark" />
-      
-      <View className="px-6 py-8 flex-1">
+      <View style={{ flex: 1, paddingHorizontal: layout.horizontalPadding, paddingTop: 24, paddingBottom: 32 }}>
         <Text className="text-3xl font-bold text-gray-900 mb-2">
           Bài quiz an toàn
         </Text>
@@ -185,7 +186,7 @@ export default function QuizScreen() {
           </View>
         </View>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 

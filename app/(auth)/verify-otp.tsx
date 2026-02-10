@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, Alert, StyleSheet } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { router, useLocalSearchParams } from 'expo-router';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import OTPInput from '../../components/auth/OTPInput';
 import { useAuthStore } from '../../store/auth.store';
 import { authApi } from '../../services/api/auth.api';
+import { layout } from '../../constants/layout';
 
 export default function VerifyOTPScreen() {
   const { phone, type, requestId } = useLocalSearchParams<{
@@ -88,10 +90,9 @@ export default function VerifyOTPScreen() {
   };
 
   return (
-    <View className="flex-1 bg-white px-6">
+    <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
       <StatusBar style="dark" />
-      
-      <View className="flex-1 justify-center">
+      <View style={[styles.inner, { paddingHorizontal: layout.horizontalPadding }]}>
         <Text className="text-3xl font-bold text-gray-900 mb-2">
           Xác thực OTP
         </Text>
@@ -129,7 +130,12 @@ export default function VerifyOTPScreen() {
           </Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  safe: { flex: 1, backgroundColor: '#fff' },
+  inner: { flex: 1, justifyContent: 'center' },
+});
 

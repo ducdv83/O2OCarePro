@@ -2,7 +2,9 @@ import { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { router, useLocalSearchParams } from 'expo-router';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { format } from 'date-fns';
+import { layout } from '../../constants/layout';
 
 interface Message {
   id: string;
@@ -56,15 +58,16 @@ export default function ChatScreen() {
     setInputText('');
   };
 
+  const pad = layout.horizontalPadding;
   return (
-    <KeyboardAvoidingView
-      className="flex-1 bg-white"
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
-      <StatusBar style="dark" />
-      
-      {/* Header */}
-      <View className="bg-white px-6 py-4 flex-row items-center border-b border-gray-200">
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }} edges={['top', 'bottom']}>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      >
+        <StatusBar style="dark" />
+        {/* Header */}
+        <View style={{ backgroundColor: '#fff', paddingHorizontal: pad, paddingVertical: 16, flexDirection: 'row', alignItems: 'center', borderBottomWidth: 1, borderBottomColor: '#e5e7eb' }}>
         <TouchableOpacity onPress={() => router.back()}>
           <Text className="text-2xl">←</Text>
         </TouchableOpacity>
@@ -76,8 +79,8 @@ export default function ChatScreen() {
         </View>
       </View>
 
-      {/* Messages */}
-      <ScrollView className="flex-1 px-6 py-4">
+        {/* Messages */}
+        <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingHorizontal: pad, paddingVertical: 16 }}>
         {messages.map((message) => (
           <View
             key={message.id}
@@ -109,8 +112,8 @@ export default function ChatScreen() {
         ))}
       </ScrollView>
 
-      {/* Input */}
-      <View className="bg-white border-t border-gray-200 px-6 py-4 flex-row items-center">
+        {/* Input */}
+        <View style={{ backgroundColor: '#fff', borderTopWidth: 1, borderTopColor: '#e5e7eb', paddingHorizontal: pad, paddingVertical: 16, flexDirection: 'row', alignItems: 'center' }}>
         <TextInput
           className="flex-1 border border-gray-300 rounded-lg px-4 py-3 mr-3"
           placeholder="Nhập tin nhắn..."
@@ -124,8 +127,9 @@ export default function ChatScreen() {
         >
           <Text className="text-white font-semibold">Gửi</Text>
         </TouchableOpacity>
-      </View>
-    </KeyboardAvoidingView>
+        </View>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 

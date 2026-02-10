@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { router, useLocalSearchParams } from 'expo-router';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Location from 'expo-location';
 import { format } from 'date-fns';
 import { bookingsApi } from '../../../services/api/bookings.api';
@@ -9,6 +10,7 @@ import { timesheetsApi, Timesheet } from '../../../services/api/timesheets.api';
 import { Booking } from '../../../types/booking.types';
 import { mapApiBookingToUiBooking } from '../../../utils/apiMappers';
 import { ErrorState } from '../../../components/ui/ErrorState';
+import { layout } from '../../../constants/layout';
 
 export default function TimesheetScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -130,40 +132,47 @@ export default function TimesheetScreen() {
 
   if (loading) {
     return (
-      <View className="flex-1 bg-white items-center justify-center">
-        <Text className="text-gray-600">Đang tải dữ liệu...</Text>
-      </View>
+      <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }} edges={['top', 'bottom']}>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <Text className="text-gray-600">Đang tải dữ liệu...</Text>
+        </View>
+      </SafeAreaView>
     );
   }
 
   if (errorMessage) {
     return (
-      <View className="flex-1 bg-white items-center justify-center px-6">
-        <ErrorState message={errorMessage} onRetry={loadBooking} />
-      </View>
+      <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }} edges={['top', 'bottom']}>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: layout.horizontalPadding }}>
+          <ErrorState message={errorMessage} onRetry={loadBooking} />
+        </View>
+      </SafeAreaView>
     );
   }
 
   if (!booking) {
     return (
-      <View className="flex-1 bg-white items-center justify-center">
-        <Text className="text-gray-600">Không tìm thấy ca làm việc</Text>
-        <TouchableOpacity
-          className="mt-4 bg-blue-500 px-6 py-3 rounded-lg"
-          onPress={() => router.back()}
-        >
-          <Text className="text-white font-semibold">Quay lại</Text>
-        </TouchableOpacity>
-      </View>
+      <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }} edges={['top', 'bottom']}>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <Text className="text-gray-600">Không tìm thấy ca làm việc</Text>
+          <TouchableOpacity
+            className="mt-4 bg-blue-500 px-6 py-3 rounded-lg"
+            onPress={() => router.back()}
+          >
+            <Text className="text-white font-semibold">Quay lại</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
     );
   }
 
+  const pad = layout.horizontalPadding;
   return (
-    <ScrollView className="flex-1 bg-gray-50">
-      <StatusBar style="dark" />
-      
-      {/* Header */}
-      <View className="bg-white px-6 py-4 flex-row items-center">
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#f9fafb' }} edges={['top', 'bottom']}>
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: layout.scrollBottomPadding }}>
+        <StatusBar style="dark" />
+        {/* Header */}
+        <View style={{ backgroundColor: '#fff', paddingHorizontal: pad, paddingVertical: 16, flexDirection: 'row', alignItems: 'center' }}>
         <TouchableOpacity onPress={() => router.back()}>
           <Text className="text-2xl">←</Text>
         </TouchableOpacity>
@@ -173,7 +182,7 @@ export default function TimesheetScreen() {
       </View>
 
       {/* Booking Info */}
-      <View className="bg-white mt-2 px-6 py-6">
+      <View style={{ backgroundColor: '#fff', marginTop: 8, paddingHorizontal: pad, paddingVertical: 24 }}>
         <Text className="text-xl font-bold text-gray-900 mb-2">
           {booking.clientName}
         </Text>
@@ -194,7 +203,7 @@ export default function TimesheetScreen() {
       </View>
 
       {/* Check-in */}
-      <View className="bg-white mt-2 px-6 py-6">
+      <View style={{ backgroundColor: '#fff', marginTop: 8, paddingHorizontal: pad, paddingVertical: 24 }}>
         <Text className="text-lg font-semibold text-gray-900 mb-4">Check-in</Text>
         {isCheckedIn ? (
           <View className="bg-green-50 border border-green-200 rounded-lg p-4">
@@ -217,7 +226,7 @@ export default function TimesheetScreen() {
 
       {/* Timer */}
       {isCheckedIn && !isCheckedOut && (
-        <View className="bg-white mt-2 px-6 py-6">
+        <View style={{ backgroundColor: '#fff', marginTop: 8, paddingHorizontal: pad, paddingVertical: 24 }}>
           <Text className="text-lg font-semibold text-gray-900 mb-4">Thời gian làm việc</Text>
           <View className="bg-blue-50 rounded-lg p-6 items-center">
             <Text className="text-blue-600 text-4xl font-bold">
@@ -229,7 +238,7 @@ export default function TimesheetScreen() {
 
       {/* Notes */}
       {isCheckedIn && (
-        <View className="bg-white mt-2 px-6 py-6">
+        <View style={{ backgroundColor: '#fff', marginTop: 8, paddingHorizontal: pad, paddingVertical: 24 }}>
           <Text className="text-lg font-semibold text-gray-900 mb-4">Ghi chú chuyên môn</Text>
           <Text className="text-gray-600 text-sm mb-2">
             Ghi chú về công việc đã thực hiện (tùy chọn)
@@ -242,7 +251,7 @@ export default function TimesheetScreen() {
 
       {/* Check-out */}
       {isCheckedIn && (
-        <View className="bg-white mt-2 px-6 py-6">
+        <View style={{ backgroundColor: '#fff', marginTop: 8, paddingHorizontal: pad, paddingVertical: 24 }}>
           <Text className="text-lg font-semibold text-gray-900 mb-4">Check-out</Text>
           {isCheckedOut ? (
             <View className="bg-green-50 border border-green-200 rounded-lg p-4">
@@ -266,7 +275,7 @@ export default function TimesheetScreen() {
 
       {/* Client Confirmation */}
       {isCheckedOut && (
-        <View className="bg-white mt-2 px-6 py-6">
+        <View style={{ backgroundColor: '#fff', marginTop: 8, paddingHorizontal: pad, paddingVertical: 24 }}>
           <Text className="text-lg font-semibold text-gray-900 mb-2">Xác nhận từ khách hàng</Text>
           {Boolean(timesheet?.client_confirmed) ? (
             <View className="bg-green-50 border border-green-200 rounded-lg p-4">
@@ -279,7 +288,8 @@ export default function TimesheetScreen() {
           )}
         </View>
       )}
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 

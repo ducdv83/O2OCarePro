@@ -2,11 +2,13 @@ import { useEffect, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { router, useLocalSearchParams } from 'expo-router';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { jobsApi } from '../../../services/api/jobs.api';
 import { proposalsApi } from '../../../services/api/proposals.api';
 import { Job } from '../../../types/booking.types';
 import { mapApiJobToUiJob } from '../../../utils/apiMappers';
 import { ErrorState } from '../../../components/ui/ErrorState';
+import { layout } from '../../../constants/layout';
 
 export default function ProposePriceScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -38,31 +40,37 @@ export default function ProposePriceScreen() {
 
   if (loadingJob && !job) {
     return (
-      <View className="flex-1 bg-white items-center justify-center">
-        <Text className="text-gray-600">Đang tải dữ liệu...</Text>
-      </View>
+      <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }} edges={['top', 'bottom']}>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <Text className="text-gray-600">Đang tải dữ liệu...</Text>
+        </View>
+      </SafeAreaView>
     );
   }
 
   if (errorMessage) {
     return (
-      <View className="flex-1 bg-white items-center justify-center px-6">
-        <ErrorState message={errorMessage} onRetry={loadJob} />
-      </View>
+      <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }} edges={['top', 'bottom']}>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: layout.horizontalPadding }}>
+          <ErrorState message={errorMessage} onRetry={loadJob} />
+        </View>
+      </SafeAreaView>
     );
   }
 
   if (!job) {
     return (
-      <View className="flex-1 bg-white items-center justify-center">
-        <Text className="text-gray-600">Không tìm thấy ca làm việc</Text>
-        <TouchableOpacity
-          className="mt-4 bg-blue-500 px-6 py-3 rounded-lg"
-          onPress={() => router.back()}
-        >
-          <Text className="text-white font-semibold">Quay lại</Text>
-        </TouchableOpacity>
-      </View>
+      <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }} edges={['top', 'bottom']}>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <Text className="text-gray-600">Không tìm thấy ca làm việc</Text>
+          <TouchableOpacity
+            className="mt-4 bg-blue-500 px-6 py-3 rounded-lg"
+            onPress={() => router.back()}
+          >
+            <Text className="text-white font-semibold">Quay lại</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
     );
   }
 
@@ -124,11 +132,11 @@ export default function ProposePriceScreen() {
   };
 
   return (
-    <ScrollView className="flex-1 bg-gray-50">
-      <StatusBar style="dark" />
-      
-      {/* Header */}
-      <View className="bg-white px-6 py-4 flex-row items-center">
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#f9fafb' }} edges={['top', 'bottom']}>
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: layout.scrollBottomPadding }}>
+        <StatusBar style="dark" />
+        {/* Header */}
+        <View style={{ backgroundColor: '#fff', paddingHorizontal: layout.horizontalPadding, paddingVertical: 16, flexDirection: 'row', alignItems: 'center' }}>
         <TouchableOpacity onPress={() => router.back()}>
           <Text className="text-2xl">←</Text>
         </TouchableOpacity>
@@ -137,8 +145,8 @@ export default function ProposePriceScreen() {
         </Text>
       </View>
 
-      {/* Info */}
-      <View className="bg-white mt-2 px-6 py-6">
+        {/* Info */}
+        <View style={{ backgroundColor: '#fff', marginTop: 8, paddingHorizontal: layout.horizontalPadding, paddingVertical: 24 }}>
         <View className="mb-4">
           <Text className="text-base font-semibold text-gray-900 mb-2">Khung giá</Text>
           {job.budgetMin > 0 || job.budgetMax > 0 ? (
@@ -185,8 +193,8 @@ export default function ProposePriceScreen() {
         </View>
       </View>
 
-      {/* Actions */}
-      <View className="px-6 py-4 gap-3">
+        {/* Actions */}
+        <View style={{ paddingHorizontal: layout.horizontalPadding, paddingVertical: 16, gap: 12 }}>
         <TouchableOpacity
           className={`bg-blue-500 rounded-lg py-4 items-center ${loading ? 'opacity-50' : ''}`}
           onPress={handleSubmit}
@@ -203,8 +211,9 @@ export default function ProposePriceScreen() {
         >
           <Text className="text-gray-700 text-lg font-semibold">Hủy</Text>
         </TouchableOpacity>
-      </View>
-    </ScrollView>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 

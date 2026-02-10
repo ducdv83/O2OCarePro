@@ -2,7 +2,9 @@ import { useState } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, Image, Alert } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { router } from 'expo-router';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
+import { layout } from '../../constants/layout';
 
 export default function EKYCScreen() {
   const [cccdFront, setCccdFront] = useState<string | null>(null);
@@ -57,10 +59,14 @@ export default function EKYCScreen() {
   };
 
   return (
-    <ScrollView className="flex-1 bg-white">
-      <StatusBar style="dark" />
-      
-      <View className="px-6 py-8">
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }} edges={['top', 'bottom']}>
+      <ScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={{ paddingBottom: layout.scrollBottomPadding }}
+        keyboardShouldPersistTaps="handled"
+      >
+        <StatusBar style="dark" />
+        <View style={{ paddingHorizontal: layout.horizontalPadding, paddingTop: 24, paddingBottom: 32 }}>
         <Text className="text-3xl font-bold text-gray-900 mb-2">
           Xác thực danh tính (eKYC)
         </Text>
@@ -143,8 +149,9 @@ export default function EKYCScreen() {
             {loading ? 'Đang gửi...' : 'Gửi để xét duyệt'}
           </Text>
         </TouchableOpacity>
-      </View>
-    </ScrollView>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 

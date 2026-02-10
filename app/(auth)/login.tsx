@@ -1,9 +1,11 @@
 import { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { router } from 'expo-router';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { authApi } from '../../services/api/auth.api';
 import { useAuthStore } from '../../store/auth.store';
+import { layout } from '../../constants/layout';
 
 export default function LoginScreen() {
   const [phone, setPhone] = useState('');
@@ -43,70 +45,139 @@ export default function LoginScreen() {
     }
   };
 
+  const paddingHorizontal = layout.horizontalPadding;
+
   return (
-    <View className="flex-1 bg-white px-6">
+    <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
       <StatusBar style="dark" />
+      <KeyboardAvoidingView
+        style={styles.keyboard}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        <View style={[styles.inner, { paddingHorizontal, maxWidth: layout.formMaxWidth }]}>
+          <Text style={styles.title}>Đăng nhập</Text>
+          <Text style={styles.subtitle}>Nhập số điện thoại và mật khẩu</Text>
 
-      <View className="flex-1 justify-center">
-        <Text className="text-3xl font-bold text-gray-900 mb-2">
-          Đăng nhập
-        </Text>
-        <Text className="text-base text-gray-600 mb-8">
-          Nhập số điện thoại và mật khẩu
-        </Text>
+          <View style={styles.field}>
+            <Text style={styles.label}>Số điện thoại (tên đăng nhập)</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="0901234567"
+              value={phone}
+              onChangeText={(t) => { setPhone(t); setErrorMessage(''); }}
+              keyboardType="phone-pad"
+              autoFocus
+              placeholderTextColor="#9CA3AF"
+            />
+          </View>
 
-        <View className="mb-4">
-          <Text className="text-sm text-gray-700 mb-2">Số điện thoại (tên đăng nhập)</Text>
-          <TextInput
-            className="border border-gray-300 rounded-lg px-4 py-3 text-lg"
-            placeholder="0901234567"
-            value={phone}
-            onChangeText={(text) => {
-              setPhone(text);
-              setErrorMessage('');
-            }}
-            keyboardType="phone-pad"
-            autoFocus
-          />
+          <View style={styles.field}>
+            <Text style={styles.label}>Mật khẩu</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Mật khẩu"
+              value={password}
+              onChangeText={(t) => { setPassword(t); setErrorMessage(''); }}
+              secureTextEntry
+              placeholderTextColor="#9CA3AF"
+            />
+          </View>
+
+          {errorMessage ? <Text style={styles.error}>{errorMessage}</Text> : null}
+
+          <TouchableOpacity
+            style={[styles.btn, loading && styles.btnDisabled]}
+            onPress={handleLogin}
+            disabled={loading}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.btnText}>
+              {loading ? 'Đang đăng nhập...' : 'Đăng nhập'}
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.backBtn} onPress={() => router.back()} activeOpacity={0.7}>
+            <Text style={styles.backText}>Quay lại</Text>
+          </TouchableOpacity>
         </View>
-
-        <View className="mb-6">
-          <Text className="text-sm text-gray-700 mb-2">Mật khẩu</Text>
-          <TextInput
-            className="border border-gray-300 rounded-lg px-4 py-3 text-lg"
-            placeholder="Mật khẩu"
-            value={password}
-            onChangeText={(text) => {
-              setPassword(text);
-              setErrorMessage('');
-            }}
-            secureTextEntry
-          />
-        </View>
-
-        {errorMessage ? (
-          <Text className="text-red-500 text-sm mb-4">{errorMessage}</Text>
-        ) : null}
-
-        <TouchableOpacity
-          className={`bg-blue-500 py-4 rounded-lg items-center ${loading ? 'opacity-50' : ''}`}
-          onPress={handleLogin}
-          disabled={loading}
-        >
-          <Text className="text-white text-lg font-semibold">
-            {loading ? 'Đang đăng nhập...' : 'Đăng nhập'}
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          className="mt-4"
-          onPress={() => router.back()}
-        >
-          <Text className="text-center text-blue-500">
-            Quay lại
-          </Text>
-        </TouchableOpacity>
-      </View>
-    </View>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  safe: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  keyboard: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  inner: {
+    alignSelf: 'center',
+    width: '100%',
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#111827',
+    marginBottom: 8,
+  },
+  subtitle: {
+    fontSize: 16,
+    color: '#6B7280',
+    marginBottom: 24,
+  },
+  field: {
+    marginBottom: layout.formGroupGap,
+  },
+  label: {
+    fontSize: 14,
+    color: '#374151',
+    marginBottom: layout.labelInputGap,
+    fontWeight: '500',
+  },
+  input: {
+    minHeight: layout.inputMinHeight,
+    borderWidth: 1,
+    borderColor: '#D1D5DB',
+    borderRadius: layout.inputBorderRadius,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    fontSize: 16,
+    color: '#111827',
+    backgroundColor: '#fff',
+  },
+  error: {
+    fontSize: 14,
+    color: '#DC2626',
+    marginBottom: 16,
+  },
+  btn: {
+    height: layout.buttonHeight,
+    backgroundColor: '#3B82F6',
+    borderRadius: layout.inputBorderRadius,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 8,
+  },
+  btnDisabled: {
+    opacity: 0.6,
+  },
+  btnText: {
+    fontSize: 17,
+    fontWeight: '600',
+    color: '#fff',
+  },
+  backBtn: {
+    marginTop: 16,
+    alignItems: 'center',
+    paddingVertical: 8,
+  },
+  backText: {
+    fontSize: 16,
+    color: '#3B82F6',
+    fontWeight: '500',
+  },
+});

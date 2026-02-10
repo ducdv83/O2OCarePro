@@ -1,21 +1,29 @@
-import { View } from 'react-native';
+import { Image, StyleSheet } from 'react-native';
 import { Tabs } from 'expo-router';
 
-// Simple icon component - sẽ thay bằng react-native-vector-icons sau
-function TabIcon({ color, focused }: { color: string; focused: boolean }) {
+const TAB_ICON_SOURCES = {
+  index: require('../../assets/icons/home.png'),
+  bookings: require('../../assets/icons/bookings.png'),
+  income: require('../../assets/icons/income.png'),
+  profile: require('../../assets/icons/profile.png'),
+} as const;
+
+function TabIcon({ name }: { name: keyof typeof TAB_ICON_SOURCES }) {
   return (
-    <View style={{ width: 24, height: 24, alignItems: 'center', justifyContent: 'center' }}>
-      <View
-        style={{
-          width: focused ? 10 : 8,
-          height: focused ? 10 : 8,
-          backgroundColor: color,
-          borderRadius: 999,
-        }}
-      />
-    </View>
+    <Image
+      source={TAB_ICON_SOURCES[name]}
+      style={styles.tabIcon}
+      resizeMode="contain"
+    />
   );
 }
+
+const styles = StyleSheet.create({
+  tabIcon: {
+    width: 34,
+    height: 34,
+  },
+});
 
 export default function TabsLayout() {
   return (
@@ -46,28 +54,28 @@ export default function TabsLayout() {
         name="index"
         options={{
           title: 'Trang chủ',
-          tabBarIcon: ({ color, focused }) => <TabIcon color={color} focused={focused} />,
+          tabBarIcon: () => <TabIcon name="index" />,
         }}
       />
       <Tabs.Screen
         name="bookings"
         options={{
           title: 'Ca đã nhận',
-          tabBarIcon: ({ color, focused }) => <TabIcon color={color} focused={focused} />,
+          tabBarIcon: () => <TabIcon name="bookings" />,
         }}
       />
       <Tabs.Screen
         name="income"
         options={{
           title: 'Thu nhập',
-          tabBarIcon: ({ color, focused }) => <TabIcon color={color} focused={focused} />,
+          tabBarIcon: () => <TabIcon name="income" />,
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
           title: 'Cá nhân',
-          tabBarIcon: ({ color, focused }) => <TabIcon color={color} focused={focused} />,
+          tabBarIcon: () => <TabIcon name="profile" />,
         }}
       />
     </Tabs>

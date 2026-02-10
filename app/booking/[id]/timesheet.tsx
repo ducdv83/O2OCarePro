@@ -3,25 +3,68 @@ import { View, Text, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { router, useLocalSearchParams } from 'expo-router';
 import * as Location from 'expo-location';
-import { mockBookings } from '../../../utils/mockData';
 import { format } from 'date-fns';
+import { bookingsApi } from '../../../services/api/bookings.api';
+import { timesheetsApi, Timesheet } from '../../../services/api/timesheets.api';
+import { Booking } from '../../../types/booking.types';
+import { mapApiBookingToUiBooking } from '../../../utils/apiMappers';
+import { ErrorState } from '../../../components/ui/ErrorState';
 
 export default function TimesheetScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const booking = mockBookings.find((b) => b.id === id);
+  const [booking, setBooking] = useState<Booking | null>(null);
+  const [timesheet, setTimesheet] = useState<Timesheet | null>(null);
   const [isCheckedIn, setIsCheckedIn] = useState(false);
   const [isCheckedOut, setIsCheckedOut] = useState(false);
   const [timer, setTimer] = useState(0); // seconds
   const [notes, setNotes] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const loadBooking = async () => {
+    if (!id) return;
+    setLoading(true);
+    setErrorMessage(null);
+    try {
+      const response = await bookingsApi.findOne(id);
+      const mapped = mapApiBookingToUiBooking(response);
+      setBooking(mapped);
+      if (response?.timesheet) {
+        setTimesheet(response.timesheet);
+      } else {
+        try {
+          const ts = await timesheetsApi.getOne(id);
+          setTimesheet(ts);
+        } catch {
+          setTimesheet(null);
+        }
+      }
+    } catch (error: any) {
+      setErrorMessage(error?.message || 'Không thể tải thông tin chấm công.');
+      setBooking(null);
+      setTimesheet(null);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    if (booking?.timesheet?.checkinAt) {
+    loadBooking();
+  }, [id]);
+
+  useEffect(() => {
+    if (timesheet?.checkin_at) {
       setIsCheckedIn(true);
+      const checkinTime = new Date(timesheet.checkin_at).getTime();
+      const now = Date.now();
+      if (now > checkinTime) {
+        setTimer(Math.floor((now - checkinTime) / 1000));
+      }
     }
-    if (booking?.timesheet?.checkoutAt) {
+    if (timesheet?.checkout_at) {
       setIsCheckedOut(true);
     }
-  }, [booking]);
+  }, [timesheet]);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -41,6 +84,7 @@ export default function TimesheetScreen() {
   };
 
   const handleCheckIn = async () => {
+    if (!id) return;
     const { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== 'granted') {
       Alert.alert('Lỗi', 'Cần quyền truy cập vị trí để check-in');
@@ -48,13 +92,21 @@ export default function TimesheetScreen() {
     }
 
     const location = await Location.getCurrentPositionAsync({});
-    
-    // Mock check-in
-    Alert.alert('Thành công', 'Đã check-in thành công!');
-    setIsCheckedIn(true);
+    try {
+      const ts = await timesheetsApi.checkIn(id, {
+        lat: location.coords.latitude,
+        lng: location.coords.longitude,
+      });
+      setTimesheet(ts);
+      Alert.alert('Thành công', 'Đã check-in thành công!');
+      setIsCheckedIn(true);
+    } catch (error: any) {
+      Alert.alert('Lỗi', error?.message || 'Không thể check-in. Vui lòng thử lại.');
+    }
   };
 
   const handleCheckOut = async () => {
+    if (!id) return;
     const { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== 'granted') {
       Alert.alert('Lỗi', 'Cần quyền truy cập vị trí để check-out');
@@ -62,11 +114,35 @@ export default function TimesheetScreen() {
     }
 
     const location = await Location.getCurrentPositionAsync({});
-    
-    // Mock check-out
-    Alert.alert('Thành công', 'Đã check-out thành công!');
-    setIsCheckedOut(true);
+    try {
+      const ts = await timesheetsApi.checkOut(id, {
+        lat: location.coords.latitude,
+        lng: location.coords.longitude,
+        note: notes || undefined,
+      });
+      setTimesheet(ts);
+      Alert.alert('Thành công', 'Đã check-out thành công!');
+      setIsCheckedOut(true);
+    } catch (error: any) {
+      Alert.alert('Lỗi', error?.message || 'Không thể check-out. Vui lòng thử lại.');
+    }
   };
+
+  if (loading) {
+    return (
+      <View className="flex-1 bg-white items-center justify-center">
+        <Text className="text-gray-600">Đang tải dữ liệu...</Text>
+      </View>
+    );
+  }
+
+  if (errorMessage) {
+    return (
+      <View className="flex-1 bg-white items-center justify-center px-6">
+        <ErrorState message={errorMessage} onRetry={loadBooking} />
+      </View>
+    );
+  }
 
   if (!booking) {
     return (
@@ -124,8 +200,8 @@ export default function TimesheetScreen() {
           <View className="bg-green-50 border border-green-200 rounded-lg p-4">
             <Text className="text-green-700 font-semibold mb-1">✓ Đã check-in</Text>
             <Text className="text-green-600 text-sm">
-              {booking.timesheet?.checkinAt
-                ? format(booking.timesheet.checkinAt, 'HH:mm dd/MM/yyyy')
+              {timesheet?.checkin_at
+                ? format(new Date(timesheet.checkin_at), 'HH:mm dd/MM/yyyy')
                 : 'Vừa xong'}
             </Text>
           </View>
@@ -172,8 +248,8 @@ export default function TimesheetScreen() {
             <View className="bg-green-50 border border-green-200 rounded-lg p-4">
               <Text className="text-green-700 font-semibold mb-1">✓ Đã check-out</Text>
               <Text className="text-green-600 text-sm">
-                {booking.timesheet?.checkoutAt
-                  ? format(booking.timesheet.checkoutAt, 'HH:mm dd/MM/yyyy')
+                {timesheet?.checkout_at
+                  ? format(new Date(timesheet.checkout_at), 'HH:mm dd/MM/yyyy')
                   : 'Vừa xong'}
               </Text>
             </View>
@@ -192,7 +268,7 @@ export default function TimesheetScreen() {
       {isCheckedOut && (
         <View className="bg-white mt-2 px-6 py-6">
           <Text className="text-lg font-semibold text-gray-900 mb-2">Xác nhận từ khách hàng</Text>
-          {booking.timesheet?.clientConfirmed ? (
+          {Boolean(timesheet?.client_confirmed) ? (
             <View className="bg-green-50 border border-green-200 rounded-lg p-4">
               <Text className="text-green-700 font-semibold">✓ Đã được xác nhận</Text>
             </View>

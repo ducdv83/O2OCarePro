@@ -1,0 +1,73 @@
+require('dotenv').config();
+
+module.exports = {
+  expo: {
+    name: 'O2O CarePro',
+    slug: 'o2o-carepro',
+    version: '1.0.0',
+    orientation: 'portrait',
+    icon: './assets/logo.png',
+    userInterfaceStyle: 'light',
+    newArchEnabled: true,
+    splash: {
+      image: './assets/logo.png',
+      resizeMode: 'contain',
+      backgroundColor: '#ffffff',
+    },
+    scheme: 'o2o-carepro',
+    ios: {
+      supportsTablet: true,
+      bundleIdentifier: 'com.o2o.carepro',
+      infoPlist: {
+        NSAppTransportSecurity: {
+          NSAllowsArbitraryLoads: true,
+          NSExceptionDomains: {
+            '192.168.1.11': {
+              NSExceptionAllowsInsecureHTTPLoads: true,
+              NSIncludesSubdomains: true,
+            },
+            'localhost': {
+              NSExceptionAllowsInsecureHTTPLoads: true,
+              NSIncludesSubdomains: true,
+            },
+          },
+        },
+      },
+    },
+    android: {
+      adaptiveIcon: {
+        foregroundImage: './assets/logo.png',
+        backgroundColor: '#ffffff',
+      },
+      package: 'com.o2o.carepro',
+      edgeToEdgeEnabled: true,
+      predictiveBackGestureEnabled: false,
+    },
+    web: {
+      favicon: './assets/favicon.png',
+    },
+    plugins: [
+      'expo-router',
+      [
+        'expo-image-picker',
+        {
+          photosPermission:
+            'The app accesses your photos to upload profile pictures and certificates.',
+        },
+      ],
+      [
+        'expo-location',
+        {
+          locationAlwaysAndWhenInUsePermission:
+            'The app uses your location for check-in/out and to find nearby jobs.',
+        },
+      ],
+    ],
+    experiments: {
+      typedRoutes: true,
+    },
+    extra: {
+      apiUrl: process.env.EXPO_PUBLIC_API_URL,
+    },
+  },
+};

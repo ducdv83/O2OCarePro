@@ -1,38 +1,43 @@
 import { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { router } from 'expo-router';
 import { authApi } from '../../services/api/auth.api';
+import { useAuthStore } from '../../store/auth.store';
 
 export default function LoginScreen() {
   const [phone, setPhone] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const setToken = useAuthStore((s) => s.setToken);
+  const setUser = useAuthStore((s) => s.setUser);
 
-  const handleSendOTP = async () => {
+  const handleLogin = async () => {
+    setErrorMessage('');
     if (!phone || phone.length < 10) {
-      Alert.alert('Lỗi', 'Vui lòng nhập số điện thoại hợp lệ');
+      setErrorMessage('Vui lòng nhập số điện thoại hợp lệ');
+      return;
+    }
+    if (!password) {
+      setErrorMessage('Vui lòng nhập mật khẩu');
       return;
     }
 
-    console.log('[Login] Gửi OTP cho số:', phone);
     setLoading(true);
     try {
-      const response = await authApi.requestOtp(phone);
-      console.log('[Login] OTP response:', response?.request_id ?? response);
-      router.push({
-        pathname: '/(auth)/verify-otp',
-        params: { phone, type: 'login', requestId: response.request_id },
+      const response = await authApi.login(phone, password);
+      setToken(response.token);
+      setUser({
+        id: response.user.id,
+        phone: response.user.phone,
+        role: response.user.role,
+        fullName: response.user.full_name,
       });
+      router.replace('/(tabs)');
     } catch (error: any) {
-      // [DEV] Khi backend không chạy / lỗi mạng: vẫn vào màn verify-otp, dùng nút "Dev: Vào app (OTP 1234)"
-      if (__DEV__ && (error?.message?.includes('Network') || error?.code === 'ERR_NETWORK')) {
-        router.push({
-          pathname: '/(auth)/verify-otp',
-          params: { phone, type: 'login', requestId: 'dev-request-id' },
-        });
-        return;
-      }
-      Alert.alert('Lỗi', error.message || 'Không thể gửi mã OTP. Vui lòng thử lại.');
+      const msg = Array.isArray(error?.message) ? error.message[0] : error?.message;
+      setErrorMessage(msg || 'Đăng nhập thất bại. Vui lòng thử lại.');
     } finally {
       setLoading(false);
     }
@@ -41,34 +46,55 @@ export default function LoginScreen() {
   return (
     <View className="flex-1 bg-white px-6">
       <StatusBar style="dark" />
-      
+
       <View className="flex-1 justify-center">
         <Text className="text-3xl font-bold text-gray-900 mb-2">
           Đăng nhập
         </Text>
         <Text className="text-base text-gray-600 mb-8">
-          Nhập số điện thoại để nhận mã OTP
+          Nhập số điện thoại và mật khẩu
         </Text>
 
-        <View className="mb-6">
-          <Text className="text-sm text-gray-700 mb-2">Số điện thoại</Text>
+        <View className="mb-4">
+          <Text className="text-sm text-gray-700 mb-2">Số điện thoại (tên đăng nhập)</Text>
           <TextInput
             className="border border-gray-300 rounded-lg px-4 py-3 text-lg"
             placeholder="0901234567"
             value={phone}
-            onChangeText={setPhone}
+            onChangeText={(text) => {
+              setPhone(text);
+              setErrorMessage('');
+            }}
             keyboardType="phone-pad"
             autoFocus
           />
         </View>
 
+        <View className="mb-6">
+          <Text className="text-sm text-gray-700 mb-2">Mật khẩu</Text>
+          <TextInput
+            className="border border-gray-300 rounded-lg px-4 py-3 text-lg"
+            placeholder="Mật khẩu"
+            value={password}
+            onChangeText={(text) => {
+              setPassword(text);
+              setErrorMessage('');
+            }}
+            secureTextEntry
+          />
+        </View>
+
+        {errorMessage ? (
+          <Text className="text-red-500 text-sm mb-4">{errorMessage}</Text>
+        ) : null}
+
         <TouchableOpacity
           className={`bg-blue-500 py-4 rounded-lg items-center ${loading ? 'opacity-50' : ''}`}
-          onPress={handleSendOTP}
+          onPress={handleLogin}
           disabled={loading}
         >
           <Text className="text-white text-lg font-semibold">
-            {loading ? 'Đang gửi...' : 'Gửi mã OTP'}
+            {loading ? 'Đang đăng nhập...' : 'Đăng nhập'}
           </Text>
         </TouchableOpacity>
 
@@ -84,4 +110,3 @@ export default function LoginScreen() {
     </View>
   );
 }
-

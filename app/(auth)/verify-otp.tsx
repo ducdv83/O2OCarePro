@@ -29,26 +29,7 @@ export default function VerifyOTPScreen() {
     }
   }, [countdown]);
 
-  // [DEV] Bypass OTP: nhập 123456 hoặc bấm nút bên dưới để vào app không gọi API
-  const DEV_OTP_BYPASS = '123456';
-
   const handleVerifyOTP = async (enteredOtp: string) => {
-    if (enteredOtp === DEV_OTP_BYPASS) {
-      setToken('dev-bypass-token');
-      setUser({
-        id: 'dev-user-id',
-        phone: phone || '',
-        role: type === 'register' ? 'CAREPRO' : 'CAREPRO',
-        fullName: 'CarePro (Dev)',
-      });
-      if (type === 'register') {
-        router.replace('/(auth)/complete-profile');
-      } else {
-        router.replace('/(tabs)');
-      }
-      return;
-    }
-
     if (!currentRequestId) {
       Alert.alert('Lỗi', 'Không tìm thấy request ID. Vui lòng gửi lại mã OTP.');
       return;
@@ -56,11 +37,17 @@ export default function VerifyOTPScreen() {
 
     setLoading(true);
     try {
+      console.log('[OTP] Verify start', {
+        phone,
+        type,
+        requestId: currentRequestId,
+      });
       const response = await authApi.verifyOtp({
         request_id: currentRequestId,
         otp: enteredOtp,
         role: type === 'register' ? 'CAREPRO' : undefined,
       });
+      console.log('[OTP] Verify success', response?.user?.id);
 
       setToken(response.token);
       setUser({
@@ -76,6 +63,7 @@ export default function VerifyOTPScreen() {
         router.replace('/(tabs)');
       }
     } catch (error: any) {
+      console.log('[OTP] Verify failed', error?.message || error);
       Alert.alert('Lỗi', error.message || 'Mã OTP không đúng. Vui lòng thử lại.');
     } finally {
       setLoading(false);
@@ -130,15 +118,6 @@ export default function VerifyOTPScreen() {
               </Text>
             </TouchableOpacity>
           )}
-          {/* [DEV] Bỏ qua verify — xóa khi ship */}
-          <TouchableOpacity
-            onPress={() => handleVerifyOTP(DEV_OTP_BYPASS)}
-            className="mt-2 px-4 py-2 bg-amber-100 rounded-lg"
-          >
-            <Text className="text-amber-800 text-sm font-medium">
-              Dev: Vào app (OTP 123456)
-            </Text>
-          </TouchableOpacity>
         </View>
 
         <TouchableOpacity

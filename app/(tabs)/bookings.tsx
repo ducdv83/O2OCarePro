@@ -1,12 +1,14 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, RefreshControl } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { router } from 'expo-router';
-import { mockBookings } from '../../utils/mockData';
 import { Booking, BookingStatus } from '../../types/booking.types';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { bookingsApi } from '../../services/api/bookings.api';
+import { mapApiBookingToUiBooking } from '../../utils/apiMappers';
+import { ErrorState } from '../../components/ui/ErrorState';
 
 const TABS: { key: BookingStatus | 'ALL'; label: string }[] = [
   { key: 'ALL', label: 'Tất cả' },
@@ -19,19 +21,39 @@ const TABS: { key: BookingStatus | 'ALL'; label: string }[] = [
 export default function BookingsScreen() {
   const [activeTab, setActiveTab] = useState<BookingStatus | 'ALL'>('ALL');
   const [refreshing, setRefreshing] = useState(false);
+  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const filteredBookings = mockBookings.filter((booking) => {
+  const filteredBookings = bookings.filter((booking) => {
     if (activeTab === 'ALL') return true;
     return booking.status === activeTab;
   });
 
+  const loadBookings = async () => {
+    setLoading(true);
+    setErrorMessage(null);
+    try {
+      const status = activeTab === 'ALL' ? undefined : activeTab;
+      const response = await bookingsApi.findAll(status ? { status } : undefined);
+      setBookings(response.map(mapApiBookingToUiBooking));
+    } catch (error: any) {
+      setErrorMessage(error?.message || 'Không thể tải danh sách ca.');
+      setBookings([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const onRefresh = async () => {
     setRefreshing(true);
-    // Simulate API call
-    setTimeout(() => {
-      setRefreshing(false);
-    }, 1000);
+    await loadBookings();
+    setRefreshing(false);
   };
+
+  useEffect(() => {
+    loadBookings();
+  }, [activeTab]);
 
   const getStatusStyle = (status: BookingStatus) => {
     switch (status) {
@@ -103,7 +125,13 @@ export default function BookingsScreen() {
             ))}
           </View>
         </View>
-        {filteredBookings.length === 0 ? (
+        {errorMessage ? (
+          <ErrorState message={errorMessage} onRetry={loadBookings} />
+        ) : loading ? (
+          <View className="bg-white rounded-2xl p-8 items-center mt-8 border border-slate-100">
+            <Text className="text-slate-600 text-center text-sm">Đang tải dữ liệu...</Text>
+          </View>
+        ) : filteredBookings.length === 0 ? (
           <View className="bg-white rounded-2xl p-8 items-center mt-8 border border-slate-100">
             <View className="w-12 h-12 rounded-full bg-blue-50 mb-4" />
             <Text className="text-slate-900 text-lg font-semibold mb-2 text-center">

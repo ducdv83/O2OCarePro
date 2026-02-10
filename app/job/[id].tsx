@@ -1,15 +1,56 @@
+import { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { router, useLocalSearchParams } from 'expo-router';
-import { mockJobs } from '../../utils/mockData';
 import { SERVICE_TYPES } from '../../constants/serviceTypes';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { jobsApi } from '../../services/api/jobs.api';
+import { Job } from '../../types/booking.types';
+import { mapApiJobToUiJob } from '../../utils/apiMappers';
+import { ErrorState } from '../../components/ui/ErrorState';
 
 export default function JobDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const job = mockJobs.find((j) => j.id === id);
+  const [job, setJob] = useState<Job | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const loadJob = async () => {
+    if (!id) return;
+    setLoading(true);
+    setErrorMessage(null);
+    try {
+      const response = await jobsApi.findOne(id);
+      setJob(mapApiJobToUiJob(response));
+    } catch (error: any) {
+      setErrorMessage(error?.message || 'Không thể tải chi tiết ca làm việc.');
+      setJob(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadJob();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <View className="flex-1 bg-white items-center justify-center">
+        <Text className="text-gray-600">Đang tải dữ liệu...</Text>
+      </View>
+    );
+  }
+
+  if (errorMessage) {
+    return (
+      <View className="flex-1 bg-white items-center justify-center px-6">
+        <ErrorState message={errorMessage} onRetry={loadJob} />
+      </View>
+    );
+  }
 
   if (!job) {
     return (
@@ -29,7 +70,8 @@ export default function JobDetailScreen() {
 
   const handleAcceptJob = () => {
     router.push({
-      pathname: `/job/${id}/propose`,
+      pathname: '/job/[id]/propose',
+      params: { id },
     });
   };
 
@@ -92,12 +134,18 @@ export default function JobDetailScreen() {
 
         <View className="mb-4">
           <Text className="text-base font-semibold text-slate-900 mb-2">Khung giá</Text>
-          <Text className="text-slate-700 text-lg">
-            {job.budgetMin.toLocaleString('vi-VN')} - {job.budgetMax.toLocaleString('vi-VN')}đ/h
-          </Text>
-          <Text className="text-slate-500 text-sm mt-1">
-            Bạn có thể đề nghị giá trong khung này
-          </Text>
+          {job.budgetMin > 0 || job.budgetMax > 0 ? (
+            <>
+              <Text className="text-slate-700 text-lg">
+                {job.budgetMin.toLocaleString('vi-VN')} - {job.budgetMax.toLocaleString('vi-VN')}đ/h
+              </Text>
+              <Text className="text-slate-500 text-sm mt-1">
+                Bạn có thể đề nghị giá trong khung này
+              </Text>
+            </>
+          ) : (
+            <Text className="text-slate-700 text-lg">Thỏa thuận</Text>
+          )}
         </View>
 
         <View className="mb-4">

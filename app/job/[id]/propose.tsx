@@ -1,15 +1,56 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { router, useLocalSearchParams } from 'expo-router';
-import { mockJobs } from '../../../utils/mockData';
+import { jobsApi } from '../../../services/api/jobs.api';
+import { proposalsApi } from '../../../services/api/proposals.api';
+import { Job } from '../../../types/booking.types';
+import { mapApiJobToUiJob } from '../../../utils/apiMappers';
+import { ErrorState } from '../../../components/ui/ErrorState';
 
 export default function ProposePriceScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const job = mockJobs.find((j) => j.id === id);
+  const [job, setJob] = useState<Job | null>(null);
   const [proposedRate, setProposedRate] = useState('');
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [loadingJob, setLoadingJob] = useState(false);
+
+  const loadJob = async () => {
+    if (!id) return;
+    setLoadingJob(true);
+    setErrorMessage(null);
+    try {
+      const response = await jobsApi.findOne(id);
+      setJob(mapApiJobToUiJob(response));
+    } catch (error: any) {
+      setErrorMessage(error?.message || 'Không thể tải thông tin ca làm việc.');
+      setJob(null);
+    } finally {
+      setLoadingJob(false);
+    }
+  };
+
+  useEffect(() => {
+    loadJob();
+  }, [id]);
+
+  if (loadingJob && !job) {
+    return (
+      <View className="flex-1 bg-white items-center justify-center">
+        <Text className="text-gray-600">Đang tải dữ liệu...</Text>
+      </View>
+    );
+  }
+
+  if (errorMessage) {
+    return (
+      <View className="flex-1 bg-white items-center justify-center px-6">
+        <ErrorState message={errorMessage} onRetry={loadJob} />
+      </View>
+    );
+  }
 
   if (!job) {
     return (
@@ -33,7 +74,8 @@ export default function ProposePriceScreen() {
       return;
     }
 
-    if (rate < job.budgetMin || rate > job.budgetMax) {
+    const hasBudgetRange = job.budgetMin > 0 || job.budgetMax > 0;
+    if (hasBudgetRange && (rate < job.budgetMin || rate > job.budgetMax)) {
       Alert.alert(
         'Cảnh báo',
         `Giá đề nghị nên nằm trong khung ${job.budgetMin.toLocaleString('vi-VN')} - ${job.budgetMax.toLocaleString('vi-VN')}đ/h. Bạn có chắc muốn tiếp tục?`,
@@ -51,9 +93,12 @@ export default function ProposePriceScreen() {
   const submitProposal = async (rate: number) => {
     setLoading(true);
     
-    // Mock submit proposal
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      await proposalsApi.create({
+        job_id: job.id,
+        proposed_rate: rate,
+        message: message || undefined,
+      });
       Alert.alert(
         'Thành công',
         'Đề nghị của bạn đã được gửi. Khách hàng sẽ xem xét và phản hồi sớm nhất.',
@@ -64,12 +109,17 @@ export default function ProposePriceScreen() {
           },
         ]
       );
-    }, 1000);
+    } catch (error: any) {
+      Alert.alert('Lỗi', error?.message || 'Không thể gửi đề nghị. Vui lòng thử lại.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const isOutOfRange = () => {
     const rate = parseInt(proposedRate);
     if (isNaN(rate)) return false;
+    if (job.budgetMin <= 0 && job.budgetMax <= 0) return false;
     return rate < job.budgetMin || rate > job.budgetMax;
   };
 
@@ -91,9 +141,13 @@ export default function ProposePriceScreen() {
       <View className="bg-white mt-2 px-6 py-6">
         <View className="mb-4">
           <Text className="text-base font-semibold text-gray-900 mb-2">Khung giá</Text>
-          <Text className="text-gray-700 text-lg">
-            {job.budgetMin.toLocaleString('vi-VN')} - {job.budgetMax.toLocaleString('vi-VN')}đ/h
-          </Text>
+          {job.budgetMin > 0 || job.budgetMax > 0 ? (
+            <Text className="text-gray-700 text-lg">
+              {job.budgetMin.toLocaleString('vi-VN')} - {job.budgetMax.toLocaleString('vi-VN')}đ/h
+            </Text>
+          ) : (
+            <Text className="text-gray-700 text-lg">Thỏa thuận</Text>
+          )}
         </View>
 
         <View className="mb-6">
@@ -102,7 +156,7 @@ export default function ProposePriceScreen() {
           </Text>
           <TextInput
             className="border border-gray-300 rounded-lg px-4 py-3 text-lg"
-            placeholder={job.budgetMin.toString()}
+            placeholder={job.budgetMin > 0 ? job.budgetMin.toString() : 'Nhập mức giá'}
             value={proposedRate}
             onChangeText={setProposedRate}
             keyboardType="number-pad"

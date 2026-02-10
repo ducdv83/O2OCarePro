@@ -1,32 +1,71 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, Switch, RefreshControl } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { router } from 'expo-router';
 import { useAuthStore } from '../../store/auth.store';
 import { SERVICE_TYPES } from '../../constants/serviceTypes';
-import { mockJobs } from '../../utils/mockData';
 import { Job } from '../../types/booking.types';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import * as Location from 'expo-location';
+import { jobsApi } from '../../services/api/jobs.api';
+import { mapApiJobToUiJob } from '../../utils/apiMappers';
+import { ErrorState } from '../../components/ui/ErrorState';
 
 export default function HomeScreen() {
   const { user } = useAuthStore();
   const [isAvailable, setIsAvailable] = useState(true);
   const [selectedServiceType, setSelectedServiceType] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const filteredJobs = mockJobs.filter((job) => {
+  const filteredJobs = jobs.filter((job) => {
     if (!isAvailable) return false;
     if (selectedServiceType && job.serviceType !== selectedServiceType) return false;
     return job.status === 'OPEN';
   });
 
+  const loadJobs = async () => {
+    if (!isAvailable) {
+      setJobs([]);
+      return;
+    }
+
+    setLoading(true);
+    setErrorMessage(null);
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        setErrorMessage('Cần quyền truy cập vị trí để xem ca gần bạn.');
+        setJobs([]);
+        return;
+      }
+
+      const position = await Location.getCurrentPositionAsync({});
+      const response = await jobsApi.findNearby(
+        position.coords.latitude,
+        position.coords.longitude,
+        10
+      );
+      setJobs(response.map(mapApiJobToUiJob));
+    } catch (error: any) {
+      setErrorMessage(error?.message || 'Không thể tải danh sách ca làm việc.');
+      setJobs([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const onRefresh = async () => {
     setRefreshing(true);
-    // Simulate API call
-    setTimeout(() => {
-      setRefreshing(false);
-    }, 1000);
+    await loadJobs();
+    setRefreshing(false);
   };
+
+  useEffect(() => {
+    loadJobs();
+  }, [isAvailable]);
 
   return (
     <SafeAreaView className="flex-1 bg-slate-50" edges={['top']}>
@@ -121,7 +160,13 @@ export default function HomeScreen() {
           <Text className="text-lg font-semibold text-slate-900 mb-4">
             Ca làm việc gần bạn ({filteredJobs.length})
           </Text>
-          {filteredJobs.length === 0 ? (
+          {errorMessage ? (
+            <ErrorState message={errorMessage} onRetry={loadJobs} />
+          ) : loading ? (
+            <View className="bg-white rounded-2xl p-8 items-center border border-slate-100">
+              <Text className="text-slate-600 text-center text-sm">Đang tải dữ liệu...</Text>
+            </View>
+          ) : filteredJobs.length === 0 ? (
             <View className="bg-white rounded-2xl p-8 items-center border border-slate-100">
               <View className="w-12 h-12 rounded-full bg-blue-50 mb-4" />
               <Text className="text-slate-900 text-lg font-semibold mb-2 text-center">
@@ -158,9 +203,13 @@ export default function HomeScreen() {
                   </View>
 
                   <View className="flex-row flex-wrap items-center gap-3 mb-3">
-                    <Text className="text-sm text-slate-600">Khoảng cách {job.distance} km</Text>
+                    {typeof job.distance === 'number' && (
+                      <Text className="text-sm text-slate-600">Khoảng cách {job.distance} km</Text>
+                    )}
                     <Text className="text-sm text-slate-600">
-                      Thu nhập {job.budgetMin.toLocaleString('vi-VN')} - {job.budgetMax.toLocaleString('vi-VN')}đ/h
+                      {job.budgetMin > 0 || job.budgetMax > 0
+                        ? `Thu nhập ${job.budgetMin.toLocaleString('vi-VN')} - ${job.budgetMax.toLocaleString('vi-VN')}đ/h`
+                        : 'Thu nhập thỏa thuận'}
                     </Text>
                   </View>
 

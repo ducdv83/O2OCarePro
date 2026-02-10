@@ -1,14 +1,55 @@
+import { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { router, useLocalSearchParams } from 'expo-router';
-import { mockBookings } from '../../utils/mockData';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { bookingsApi } from '../../services/api/bookings.api';
+import { Booking } from '../../types/booking.types';
+import { mapApiBookingToUiBooking } from '../../utils/apiMappers';
+import { ErrorState } from '../../components/ui/ErrorState';
 
 export default function BookingDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const booking = mockBookings.find((b) => b.id === id);
+  const [booking, setBooking] = useState<Booking | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const loadBooking = async () => {
+    if (!id) return;
+    setLoading(true);
+    setErrorMessage(null);
+    try {
+      const response = await bookingsApi.findOne(id);
+      setBooking(mapApiBookingToUiBooking(response));
+    } catch (error: any) {
+      setErrorMessage(error?.message || 'Không thể tải chi tiết ca làm việc.');
+      setBooking(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadBooking();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <View className="flex-1 bg-white items-center justify-center">
+        <Text className="text-gray-600">Đang tải dữ liệu...</Text>
+      </View>
+    );
+  }
+
+  if (errorMessage) {
+    return (
+      <View className="flex-1 bg-white items-center justify-center px-6">
+        <ErrorState message={errorMessage} onRetry={loadBooking} />
+      </View>
+    );
+  }
 
   if (!booking) {
     return (

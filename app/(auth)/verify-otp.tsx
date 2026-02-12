@@ -138,4 +138,3 @@ const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: '#fff' },
   inner: { flex: 1, justifyContent: 'center' },
 });
-

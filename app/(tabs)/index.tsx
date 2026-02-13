@@ -11,6 +11,27 @@ import { jobsApi } from '../../services/api/jobs.api';
 import { mapApiJobToUiJob } from '../../utils/apiMappers';
 import { ErrorState } from '../../components/ui/ErrorState';
 
+/** Khoảng cách (km) giữa 2 điểm theo Haversine */
+function getDistanceKm(
+  lat1: number,
+  lng1: number,
+  lat2: number | undefined,
+  lng2: number | undefined
+): number | undefined {
+  if (lat2 == null || lng2 == null || (lat2 === 0 && lng2 === 0)) return undefined;
+  const R = 6371; // bán kính Trái Đất km
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLng = ((lng2 - lng1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLng / 2) *
+      Math.sin(dLng / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return Math.round(R * c * 10) / 10; // 1 chữ số thập phân
+}
+
 export default function HomeScreen() {
   const { user } = useAuthStore();
   const [isAvailable, setIsAvailable] = useState(true);
@@ -37,18 +58,39 @@ export default function HomeScreen() {
     try {
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
-        setErrorMessage('Cần quyền truy cập vị trí để xem ca gần bạn.');
+        setErrorMessage('Cần quyền truy cập vị trí để xem ca gần bạn. Trên web: bấm icon ổ khóa bên trái URL → Cài đặt trang → Vị trí → Cho phép.');
         setJobs([]);
         return;
       }
 
       const position = await Location.getCurrentPositionAsync({});
-      const response = await jobsApi.findNearby(
-        position.coords.latitude,
-        position.coords.longitude,
-        10
-      );
-      setJobs(response.map(mapApiJobToUiJob));
+      const lat = position.coords.latitude;
+      const lng = position.coords.longitude;
+      console.log('[Location] Vị trí hiện tại (dùng để tìm ca gần bạn):', {
+        lat,
+        lng,
+        label: `https://www.google.com/maps?q=${lat},${lng}`,
+      });
+
+      const list = await jobsApi.findNearby(lat, lng, 10);
+      const safeList = Array.isArray(list) ? list : [];
+      const mapped = safeList.map(mapApiJobToUiJob).map((j) => ({
+        ...j,
+        distance: getDistanceKm(lat, lng, j.location?.latitude, j.location?.longitude),
+      }));
+      setJobs(mapped);
+
+      mapped.forEach((job, i) => {
+        console.log(`[Location] Ca #${i + 1} (${job.id}):`, {
+          address: job.location?.address || '(không có địa chỉ)',
+          lat: job.location?.latitude,
+          lng: job.location?.longitude,
+          mapUrl:
+            job.location?.latitude != null && job.location?.longitude != null
+              ? `https://www.google.com/maps?q=${job.location.latitude},${job.location.longitude}`
+              : null,
+        });
+      });
     } catch (error: any) {
       setErrorMessage(error?.message || 'Không thể tải danh sách ca làm việc.');
       setJobs([]);

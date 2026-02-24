@@ -29,6 +29,11 @@ export default function LoginScreen() {
     setLoading(true);
     try {
       const response = await authApi.login(phone, password);
+      const role = (response.user.role || '').toUpperCase();
+      if (role !== 'CAREPRO') {
+        setErrorMessage('Tài khoản mật khẩu không đúng!');
+        return;
+      }
       setToken(response.token);
       setUser({
         id: response.user.id,

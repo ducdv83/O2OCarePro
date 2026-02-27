@@ -18,6 +18,19 @@ Xem chi tiết trong `docs/PROJECT_STRUCTURE.md`
 
 **Lưu ý Windows:** Trên Node 22 có lỗi đã biết khi load Metro config (NativeWind). Dùng **Node 20 LTS** để chạy: tải tại [nodejs.org](https://nodejs.org) hoặc dùng `nvm use 20`.
 
+### Chuẩn bị trên máy mới (Windows)
+
+1) Cài Node.js LTS (>=18) và mở terminal mới (PATH sẽ được cập nhật)
+2) Nếu PowerShell chặn chạy `npm`, dùng `npm.cmd` hoặc mở policy:
+
+```powershell
+# Cách nhanh: dùng npm.cmd để tránh lỗi ExecutionPolicy
+& "C:\Program Files\nodejs\npm.cmd" -v
+
+# Hoặc cho phép chạy script ở CurrentUser (khuyến nghị)
+Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
+```
+
 ```bash
 # Cài đặt dependencies
 npm install
